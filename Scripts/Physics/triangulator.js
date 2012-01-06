@@ -111,6 +111,27 @@ function Triangulate(points)
     }
 }
 
+function TriangulateAndCreate(points)
+{
+    var indices = Triangulate(points);
+    var triangleCount = indices.length / 3;
+    
+    var triangles = [];
+    for(var i = 0; i < triangleCount; ++i)
+    {
+        var triangleIndices = indices.splice(0, 3);
+        var triangle = [];
+        for(var j = 0; j < triangleIndices.length; ++j)
+        {
+            triangle.push( points[triangleIndices[j]] );
+        }
+        
+        triangles.push(triangle);
+    }
+    
+    return triangles;
+}
+
 // ----------------------------  Unit Tests
 
 
@@ -154,7 +175,46 @@ function Test_Triangulator()
         2, 0,
         1, 0
     ];
+    
     result = TriangulateShape(shape);
     SimpleTest.Equals(4, result.TriangleCount);
 }
 
+
+function Test_CreateTriangles()
+{
+    function CheckTriangles(shape, desired)
+    {
+        var vectors = Help.ConvertVertexBufferToVectorArray(shape, 2);
+        var triangles = TriangulateAndCreate(vectors);
+        
+        for(var i = 0; i < desired.length; ++i)
+        {
+            desired[i] = Help.ConvertVertexBufferToVectorArray(desired[i], 2);
+        }
+        
+        SimpleTest.Equals(desired, triangles);
+    }
+    
+    var shape = [
+        0,0,
+        1,0,
+        1,1,
+        0,1
+    ];
+    
+    var desired = [
+        [
+            0,0,
+            1,0,
+            1,1
+        ],
+        [
+            1,1,
+            0,1,
+            0,0
+        ]
+    ];
+    
+    CheckTriangles(shape, desired); 
+}
