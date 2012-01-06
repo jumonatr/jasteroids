@@ -111,3 +111,50 @@ function Triangulate(points)
     }
 }
 
+// ----------------------------  Unit Tests
+
+
+function Test_Triangulator()
+{
+    function TriangulateShape(shape)
+    {
+        var vectors = Help.ConvertVertexBufferToVectorArray(shape, 2);
+        var indices = Triangulate(vectors);
+        return {
+            Vectors: vectors, 
+            Indices: indices,
+            TriangleCount: indices.length / 3
+            };
+    }
+    
+    var shape = [
+        0,0,
+        1,0,
+        1,1,
+        0,1
+    ];
+    
+    var result = TriangulateShape(shape);
+    SimpleTest.Equals(2, result.TriangleCount);
+    
+    shape = [
+        1, 0,
+        1, 1,
+        -1, 0
+    ];
+    
+    result = TriangulateShape(shape);
+    SimpleTest.Equals(1, result.TriangleCount);
+    
+    shape = [
+        0, 0,
+        1, 1,
+        2, 1,
+        3, 1,
+        2, 0,
+        1, 0
+    ];
+    result = TriangulateShape(shape);
+    SimpleTest.Equals(4, result.TriangleCount);
+}
+
