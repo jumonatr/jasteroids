@@ -1,0 +1,97 @@
+﻿*
+{
+    margin: 0px;
+    padding: 0px;
+}
+
+body, #content
+{
+    width: 100%;
+}
+
+#result
+{
+    font-size: 2.5em;
+    min-height: 60px;
+    padding: 30px;
+}
+
+#output
+{
+    font-size: 1em;
+    list-style: none;
+}
+
+.test
+{
+    padding: 10px;
+    font-size: 1.1em;
+}
+
+.error
+{
+    padding: 10px;
+}
+
+.success
+{
+    color: green;   
+}
+
+.failure
+{
+    padding-left: 50px;
+    color: red;
+}
+
+li
+{
+    min-height: 30px;
+    border-top: 3px solid #F0F0F0;
+    background-color: #FDFDF0;
+}
+
+.stack
+{
+    padding-left: 40px;
+    list-style-type: decimal;
+}
+
+.trace
+{
+    border-top: 0px;
+}
+
+ul
+{
+    list-style: none;
+}
+
+.value
+{
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 1.2em;
+}
+
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
