@@ -46,6 +46,12 @@
 		</script>
 	</head>
 	<body onload="World.Init()" onresize="g_World.Resized()">
-		<canvas id="world" onclick="g_World.Clicked(this, event)"></canvas>
+		<canvas id="world" onclick="g_World.Clicked(this, event)">
+		</canvas>
+		<div id="diagnostics">
+		    <div>Asteroids: <span id="asteroidCount">-</span></div>
+		    <div>Culled: <span id="culled">-</span></div>
+		    <div>Vertices: <span id="verts">-</span></div>
+		</div>
 	</body>
 </html>

@@ -11,6 +11,8 @@ function World()
     //Private Initialisation    
     var canvas = document.getElementById("world");
     var gl = WebGLUtils.setupWebGL(canvas);
+    var debugTimer = setTimeout("g_World.RefreshDiagnostics()", 500);
+    var culled = 0;
     
     if (!gl)
     {
@@ -29,6 +31,33 @@ function World()
     asteroidShader.SetProjection(Projection);
 
     //Functions
+    this.RefreshDiagnostics = function()
+    {
+        var statistic = document.getElementById("asteroidCount");
+        if (statistic)
+        {
+            statistic.innerHTML = this.Asteroids.length;
+        }
+        
+        statistic = document.getElementById("culled");
+        if (statistic)
+        {
+            statistic.innerHTML = culled;
+        }
+        
+        statistic = document.getElementById("verts");
+        if (statistic)
+        {
+            var count = 0;
+            for(var i = 0; i < this.Asteroids.length; ++i)
+                count += this.Asteroids[i].LineBuffer.NumItems;
+                
+            statistic.innerHTML = count;
+        }
+        
+        debugTimer = setTimeout("g_World.RefreshDiagnostics()", 500);
+    }
+    
     this.CreateAsteroid = function()
     {
         var created = CreateAsteroid(gl, 50, 20);
@@ -127,10 +156,17 @@ function World()
         gl.clear(gl.COLOR_BUFFER_BIT);
         
         asteroidShader.Enable();
+        culled = this.Asteroids.length;
         for (var i = this.Asteroids.length - 1; i >= 0; i--)
         {
             this.Asteroids[i].Update(dt);
-            this.Asteroids[i].Draw(asteroidShader);
+            
+            if ( Physics.CircleInBox(this.Asteroids[i].Position, this.Asteroids[i].LineBuffer.BoundingRadius,
+                                    [ -this.HalfSize[0], -this.HalfSize[1] ], [ this.HalfSize[0], this.HalfSize[1] ]) )
+            {
+                this.Asteroids[i].Draw(asteroidShader);
+                culled--;
+            }
         }
         
         this.CheckCollisions();

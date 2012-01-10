@@ -13,6 +13,13 @@ Physics.CirclesCollide = function( positionOne, radiusOne, positionTwo, radiusTw
     return false;
 }
 
+//not precise, but works for visibility as will give false positives, but will never give false negatives
+Physics.CircleInBox = function(position, radius, botLeft, topRight)
+{
+    return botLeft[0] - radius < position[0] && position[0] < topRight[0] + radius &&
+            botLeft[1] - radius < position[1] && position[1] < topRight[1] + radius;
+}
+
 /** Ported to javascript by Julien Monat
 * Computes the intersection between two lines. The calculated point is approximate, 
  * since integers are used. If you need a more precise result, use doubles

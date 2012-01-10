@@ -66,10 +66,8 @@ function Asteroid(lineBuffer, position, angle)
         if (dt < 0.2)
             return false;
     
-        /*
         if ( !this.LineBuffer.CrudeCollidesWith(this.Position, other.LineBuffer, other.Position) )
             return false;
-        */
 
         return this.LineBuffer.CollidesWith(this.GetTransform(), other.LineBuffer, other.GetTransform());
     }
