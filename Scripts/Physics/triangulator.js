@@ -111,8 +111,12 @@ function Triangulate(points)
     }
 }
 
-function TriangulateAndCreate(points)
+//accepts array of vectors or verticebuffer and verticesize
+function TriangulateAndCreate(points, verticeSize)
 {
+    if (verticeSize)
+        points = Help.ConvertVertexBufferToVectorArray(points, verticeSize);
+
     var indices = Triangulate(points);
     var triangleCount = indices.length / 3;
     
@@ -185,8 +189,7 @@ function Test_CreateTriangles()
 {
     function CheckTriangles(shape, desired)
     {
-        var vectors = Help.ConvertVertexBufferToVectorArray(shape, 2);
-        var triangles = TriangulateAndCreate(vectors);
+        var triangles = TriangulateAndCreate(shape, 2);
         
         for(var i = 0; i < desired.length; ++i)
         {

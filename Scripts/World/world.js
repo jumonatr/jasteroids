@@ -23,18 +23,31 @@ function World()
     gl.lineWidth( 2 );
     
     var asteroidShader = CreateSimpleShader(gl);
-    
+
+    var Projection = mat4.create();
+    mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
+    asteroidShader.SetProjection(Projection);
+
     //Functions
-    this.CreateAsteroids = function()
+    this.CreateAsteroid = function()
     {
-        var Projection = mat4.create();
-        mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
-        asteroidShader.SetProjection(Projection);
-    
-        this.Asteroids.push( CreateAsteroid(gl, 50, 20) );
+        var created = CreateAsteroid(gl, 50, 20);
+        this.Asteroids.push( created );
+        return created;
     }
-    
-    var last = new Date().getTime();
+
+    function FindAsteroidsAtPoint(x, y)
+    {
+        var worldPos = [x, y];
+        var found = [];
+        for(var i = this.Asteroids.length - 1; i >= 0; --i)
+        {
+            if (!this.Asteroids[i].ContainsPoint(worldPos))
+                continue;
+                
+            found.push(this.Asteroids[i]);
+        }
+    }
     
     this.Clicked = function(canvas, event)
     {
@@ -47,21 +60,64 @@ function World()
         var worldX = Help.Lerp(-this.HalfSize[0], this.HalfSize[0], clickXRatio);
         var worldY = Help.Lerp(this.HalfSize[1], -this.HalfSize[1], clickYRatio);
         
-        var worldPos = [ worldX , worldY ];
-        
+        var worldPos = new Vector([ worldX , worldY ]);
+
+        if (event.button == 1)
+        {
+            var ast = this.CreateAsteroid();
+            ast.Position = worldPos;
+            return;
+        }
+                
         for(var i = this.Asteroids.length - 1; i >= 0; --i)
         {
-            if (this.Asteroids[i].ContainsPoint(worldPos))
+            if (this.Asteroids[i].ContainsPoint( worldPos ))
             {
-                var split = this.Asteroids[i].BreakInTwo();
-                this.Asteroids.splice(i, 1);
-                
-                for(var j = 0; j < split.length; ++j)
-                    this.Asteroids.push(split[j]);
+                //this.DestroyAsteroid(i);
+                this.Asteroids[i].SetPosition( worldPos );
             }
         }        
     }
     
+    this.DestroyAsteroid = function(index)
+    {
+        var split = this.Asteroids[index].BreakInTwo();
+        this.Asteroids.splice(index, 1);
+        
+        for(var j = 0; j < split.length; ++j)
+            this.Asteroids.push(split[j]);
+    }
+    
+    this.CheckCollisions = function()
+    {
+        var toDestroy = [];
+        var len = this.Asteroids.length;
+        for(var i = len - 1; i >= 0; --i)
+        {
+            var hit = false;
+            for(var j = i - 1; j >= 0; --j)
+            {
+                if (!this.Asteroids[i].CollidesWith(this.Asteroids[j]))
+                    continue;
+                
+                toDestroy.push(j);
+                hit = true;
+            }
+            
+            if (hit)
+                toDestroy.push(i);
+        }
+        
+        if (toDestroy.length == 0)
+            return;
+        
+        toDestroy = toDestroy.unique();
+        
+        for(var i = toDestroy.length - 1; i >= 0; --i)
+            this.DestroyAsteroid(toDestroy[i]);
+    }
+    
+    var last = new Date().getTime();
     this.Update = function()
     {
         var now = new Date().getTime();
@@ -70,12 +126,14 @@ function World()
     
         gl.clear(gl.COLOR_BUFFER_BIT);
         
-        gl.useProgram(asteroidShader);
+        asteroidShader.Enable();
         for (var i = this.Asteroids.length - 1; i >= 0; i--)
         {
             this.Asteroids[i].Update(dt);
             this.Asteroids[i].Draw(asteroidShader);
         }
+        
+        this.CheckCollisions();
         
         requestAnimFrame(function() { g_World.Update(); });
     }
@@ -94,7 +152,7 @@ function World()
     this.Resized();
     
     //create world objects
-    this.CreateAsteroids();
+    this.CreateAsteroid();
     
     //Start Main Loop
     this.Update();

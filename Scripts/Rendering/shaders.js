@@ -1,32 +1,57 @@
 ﻿function CreateSimpleShader(gl)
 {
-    var basicVertexShader = document.getElementById("simpleVertex").firstChild.nodeValue;
-    var basicFragmentShader = document.getElementById("simpleFragment").firstChild.nodeValue;
-    return _CreateShader(gl, basicVertexShader, basicFragmentShader);
+    return _CreateShader(gl, "simpleVertex", "simpleFragment");
 }
 
 //private helper functions ahead
 
-function _CreateProgram(gl, vs_source, fs_source)
+//http://learningwebgl.com/blog/?p=28
+function GetShader(gl, id)
 {
-    var vs = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vs, vs_source);
-    gl.compileShader(vs);
-    
-    var fs = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fs, fs_source);
-    gl.compileShader(fs);
+  var shaderScript = document.getElementById(id);
+  if (!shaderScript)
+      return null;
+
+  var str = "";
+  var k = shaderScript.firstChild;
+  while (k)
+  {
+      if (k.nodeType == 3)
+          str += k.textContent;
+
+      k = k.nextSibling;
+  }
+
+  var shader;
+  if (shaderScript.type == "x-shader/x-fragment") {
+      shader = gl.createShader(gl.FRAGMENT_SHADER);
+  } else if (shaderScript.type == "x-shader/x-vertex") {
+      shader = gl.createShader(gl.VERTEX_SHADER);
+  } else {
+      return null;
+  }
+
+  gl.shaderSource(shader, str);
+  gl.compileShader(shader);
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+  {
+      alert(gl.getShaderInfoLog(shader));
+      return null;
+  }
+
+  return shader;
+}
+
+function _CreateProgram(gl, vs_source_id, fs_source_id)
+{
+    var vs = GetShader(gl, vs_source_id);
+    var fs = GetShader(gl, fs_source_id);
     
     var program = gl.createProgram();
     gl.attachShader(program , vs);
     gl.attachShader(program , fs);
     gl.linkProgram(program);
-    
-    if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) 
-	    console.log(gl.getShaderInfoLog(vs));
-
-    if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) 
-    	console.log(gl.getShaderInfoLog(fs));
     
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) 
     	console.log(gl.getProgramInfoLog(program));
@@ -35,9 +60,9 @@ function _CreateProgram(gl, vs_source, fs_source)
 }
 
 
-function _CreateShader(gl, vs_source, fs_source)
+function _CreateShader(gl, vs_source_id, fs_source_id)
 {
-    var program = _CreateProgram(gl, vs_source, fs_source);
+    var program = _CreateProgram(gl, vs_source_id, fs_source_id);
     	
     gl.useProgram(program);
     	
@@ -47,19 +72,24 @@ function _CreateShader(gl, vs_source, fs_source)
     program.AttribPos = gl.getAttribLocation(program, "pos");
     
 // Helper methods
-    program.SetWorld = function SetWorld(mat)
+    program.Enable = function()
     {
-        gl.uniformMatrix4fv(program.UniformModelView , false, mat);
+        gl.useProgram(this);
+    }
+
+    program.SetWorld = function(mat)
+    {
+        gl.uniformMatrix4fv(this.UniformModelView , false, mat);
     }
     
-    program.SetProjection = function SetProjection(mat)
+    program.SetProjection = function(mat)
     {
-        gl.uniformMatrix4fv(program.UniformProjection, false, mat);
+        gl.uniformMatrix4fv(this.UniformProjection, false, mat);
     }
     
-    program.SetColor = function SetColor(color)
+    program.SetColor = function(color)
     {
-        gl.uniform4fv(program.UniformColor, color);
+        gl.uniform4fv(this.UniformColor, color);
     }
 
 //Initialization
@@ -71,7 +101,7 @@ function _CreateShader(gl, vs_source, fs_source)
     mat4.ortho(-1, 1, -1, 1, -1, 1, Projection);
     program.SetProjection(Projection);
     
-    program.SetColor([1.0, 1.0, 1.0, 1.0]);
+    program.SetColor([1.0, 1.0, 0.0, 1.0]);
     
     return program;
 }

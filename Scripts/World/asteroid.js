@@ -5,10 +5,10 @@ function CreateAsteroid(gl, max_size, min_size)
     //var vertices = CreateAsteroidVerts(6, 6, 250, 250);
     var lineBuffer = new LineLoop(gl, 3, vertices);
 
-    return new Asteroid(gl, lineBuffer);
+    return new Asteroid(lineBuffer);
 }
 
-function Asteroid(gl, lineBuffer, position, angle)
+function Asteroid(lineBuffer, position, angle)
 {
     //private variables
     var transform = mat4.create();
@@ -20,7 +20,9 @@ function Asteroid(gl, lineBuffer, position, angle)
     this.Velocity = new Vector([0 , 0]);
     this.AngularVelocity = 0.1 * Math.PI;
     this.LineBuffer = lineBuffer;
-           
+    this.CreationTime = (new Date()).getTime();
+    this.Color = Help.Colors.WHITE;
+
     this.Update = function(dt)
     {
         this.Angle += dt * this.AngularVelocity;
@@ -34,7 +36,7 @@ function Asteroid(gl, lineBuffer, position, angle)
         program.SetWorld(transform);
         program.SetColor(color);
         
-        lineBuffer.Draw(program);
+        lineBuffer.Draw(program, this.Color);
     }
     
     this.SetPosition = function(vec)
@@ -59,7 +61,17 @@ function Asteroid(gl, lineBuffer, position, angle)
     
     this.CollidesWith = function(other)
     {
-        return this.LineBuffer.CollidesWith(other.LineBuffer);
+        var now = new Date().getTime();
+        var dt = (now - this.CreationTime) / 1000.0;
+        if (dt < 0.2)
+            return false;
+    
+        /*
+        if ( !this.LineBuffer.CrudeCollidesWith(this.Position, other.LineBuffer, other.Position) )
+            return false;
+        */
+
+        return this.LineBuffer.CollidesWith(this.GetTransform(), other.LineBuffer, other.GetTransform());
     }
     
     this.BreakInTwo = function()
@@ -68,7 +80,7 @@ function Asteroid(gl, lineBuffer, position, angle)
         if (!childLineBuffers)
             return [];
             
-        var children = [ new Asteroid(gl, childLineBuffers[0], this.Position, this.Angle), new Asteroid(gl, childLineBuffers[1], this.Position, this.Angle) ];
+        var children = [ new Asteroid(childLineBuffers[0], this.Position, this.Angle), new Asteroid(childLineBuffers[1], this.Position, this.Angle) ];
         var transform = this.GetTransform();
         
         var centerOne = Help.Center(childLineBuffers[0].Vertices, childLineBuffers[0].VertexSize);
@@ -78,8 +90,11 @@ function Asteroid(gl, lineBuffer, position, angle)
         mat4.multiplyVec3(transform, centerTwo);
         
         var toTwo = new Vector(centerOne).Subtract(centerTwo);
+        toTwo = toTwo.Normalise().Multiply(10);
+        
         
         var toOne = toTwo.Multiply(-1);
+        toOne = toOne.Normalise().Multiply(10);
         
         children[0].Velocity = toTwo;
         children[1].Velocity = toOne;

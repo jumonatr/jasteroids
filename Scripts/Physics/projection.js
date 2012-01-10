@@ -14,10 +14,11 @@ Projection.ProjectShape = function(axis, vectors)
 {
     var min = Help.MAX_VALUE;
     var max = Help.MIN_VALUE;
+    var normedAxis = (new Vector(axis)).GetNormalised();
     
     for(var i = 0; i < vectors.length; ++i)
     {
-        var dot = vectors[i].Dot(axis);
+        var dot = vectors[i].Dot(normedAxis);
         min = Math.min(dot, min);
         max = Math.max(dot, max);
     }
@@ -56,6 +57,7 @@ function Test_ProjectionOverlap()
     var projectionTwo = Projection.ProjectShape(axis, vectorsOne);
     
     SimpleTest.Equals(true, projectionOne.Overlaps(projectionTwo));
+    SimpleTest.Equals(true, projectionTwo.Overlaps(projectionOne));
     
     //test equal edges
     var vectorsTwo = [
@@ -66,6 +68,7 @@ function Test_ProjectionOverlap()
 
     projectionTwo = Projection.ProjectShape(axis, vectorsTwo);
     SimpleTest.Equals(true, projectionOne.Overlaps(projectionTwo));
+    SimpleTest.Equals(true, projectionTwo.Overlaps(projectionOne));
 
     //test not intersecting
     vectorsTwo = [
@@ -76,5 +79,23 @@ function Test_ProjectionOverlap()
 
     projectionTwo = Projection.ProjectShape(axis, vectorsTwo);
     SimpleTest.Equals(false, projectionOne.Overlaps(projectionTwo));
+    SimpleTest.Equals(false, projectionTwo.Overlaps(projectionOne));
 
+    axis = [2, -1];
+    vectorsOne = [
+        new Vector([0, 0]),
+        new Vector([2, 0]),
+        new Vector([1, 2])
+    ];
+    vectorsTwo = [
+        new Vector([0, 0.1]),
+        new Vector([1, 2.1]),
+        new Vector([0.5, 3])
+    ];
+    
+    projectionOne = Projection.ProjectShape(axis, vectorsOne);    
+    projectionTwo = Projection.ProjectShape(axis, vectorsTwo);
+    
+    SimpleTest.Equals(false, projectionOne.Overlaps(projectionTwo));
+    SimpleTest.Equals(false, projectionTwo.Overlaps(projectionOne));
 }

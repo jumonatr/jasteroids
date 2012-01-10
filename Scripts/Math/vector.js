@@ -1,16 +1,23 @@
 ﻿
-function Vector(x, y, z)
+function Vector(a, b, c)
 {
-    if (x instanceof Array)
+    var x, y, z;
+    if (a instanceof Array)
     {
-        z = x[2];
-        y = x[1];
-        x = x[0];
+        x = a[0];
+        y = a[1];
+        z = a[2];
+    }
+    else
+    {
+        x = a;
+        y = b;
+        z = c;
     }
 
-    this.X = x || 0;
-    this.Y = y || 0;
-    this.Z = z || 0;
+    this[0] = x || 0;
+    this[1] = y || 0;
+    this[2] = z || 0;
     
     this.length = 3;
 }
@@ -20,22 +27,39 @@ Vector.UNIT_Y = [0, 1, 0];
 Vector.UNIT_Z = [0, 0, 1];
 Vector.ZERO = [0, 0, 0];
 
-
 Vector.prototype = new Array;
+
 Vector.prototype.__defineGetter__("X", function() { return this[0]; });
-Vector.prototype.__defineSetter__("X", function(value) { return this[0] = value; });
+Vector.prototype.__defineSetter__("X", function(value)
+{ 
+    return this[0] = value; 
+});
+
 Vector.prototype.__defineGetter__("Y", function() { return this[1]; });
-Vector.prototype.__defineSetter__("Y", function(value) { return this[1] = value; });
+Vector.prototype.__defineSetter__("Y", function(value)
+{ 
+    return this[1] = value; 
+});
+
 Vector.prototype.__defineGetter__("Z", function() { return this[2]; });
-Vector.prototype.__defineSetter__("Z", function(value) { return this[2] = value; });
+Vector.prototype.__defineSetter__("Z", function(value)
+{
+    return this[2] = value;
+});
 
 
 Vector.prototype.Normalise = function()
 {
     var len = this.GetLength();
-    this[0] /= len;
-    this[1] /= len;
-    this[2] /= len;
+    if (len == 0)
+    {
+        console.error("Tried normalising vector of 0 length");
+        return;
+    }
+    len = 1 / len;
+    this[0] *= len;
+    this[1] *= len;
+    this[2] *= len;
     return this;
 }
 
@@ -104,12 +128,18 @@ Vector.prototype.Dot = function(other)
     return this[0] * other[0] + this[1] * other[1] + this[2] * (other[2] || 1);
 }
 
-Vector.prototype.Cross = function(other)
+Vector.prototype.Cross3 = function(other)
 {
     return new Vector(  this[1] * (other[2] || 1) - this[2] * other[1], 
                         this[2] * other[0] - this[0] * (other[2] || 1), 
                         this[0] * other[1] - this[1] * other[0]);
 }
+
+Vector.prototype.Cross2 = function(other)
+{
+    return this[0] * other[1] - this[1] * other[0];
+}
+
 
 Vector.prototype.Rotate = function(radians)
 {
