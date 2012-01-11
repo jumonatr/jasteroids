@@ -43,7 +43,9 @@ function World()
         
         var maxSpeed = 50;
         created.Velocity = new Vector(maxSpeed * (Math.random() - 0.5), maxSpeed * (Math.random() - 0.5));
+
         //var created = new LineDebris([0, 0, 0, 100, 100, 0], 3);
+        //var created = new Ship();
         this.GameObjects.push( created );
         return created;
     }
@@ -93,13 +95,13 @@ function World()
         var len = this.GameObjects.length;
         for(var i = len - 1; i >= 0; --i)
         {
-            if (! (this.GameObjects[i] instanceof Asteroid) )
+            if (!this.GameObjects[i].CollidesWith)
                 continue;
                 
             var hit = false;
             for(var j = i - 1; j >= 0; --j)
             {
-                if (! (this.GameObjects[j] instanceof Asteroid) )
+                if (! this.GameObjects[j].CollidesWith )
                     continue;
 
                 if (!this.GameObjects[i].CollidesWith(this.GameObjects[j]))
@@ -177,6 +179,7 @@ function World()
     
     //create world objects
     this.CreateAsteroid();
+    this.GameObjects.push( new Ship() );
     
     //Start Main Loop
     this.Update();

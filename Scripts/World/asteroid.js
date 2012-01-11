@@ -44,16 +44,6 @@ Asteroid.prototype.Draw = function(program)
     this.LineBuffer.Draw(program, this.Color);
 }
 
-Asteroid.prototype.GetTransform = function()
-{
-    var transform = mat4.create();
-    mat4.identity(transform);
-    mat4.translate(transform, this.Position);
-    mat4.rotate(transform, this.Angle, Vector.UNIT_Z);
-    
-    return transform;
-}
-
 Asteroid.prototype.ContainsPoint = function(point)
 {
     return this.LineBuffer.ContainsPoint(point, this.GetTransform());
