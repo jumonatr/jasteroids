@@ -19,7 +19,7 @@ function Asteroid(lineBuffer, position, angle)
         
     if (angle)
         this.Angle = angle;
-    
+
     this.LineBuffer = lineBuffer;
     this.CreationTime = (new Date()).getTime();
     this.Color = Help.Colors.WHITE;       

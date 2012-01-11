@@ -37,5 +37,7 @@ LineDebris.prototype.Draw = function(program)
     program.SetColor(this.Color);
     
     gl.drawArrays(gl.LINE_STRIP, 0, this.NumItems);
-    gl.drawArrays(gl.POINTS, 0, this.NumItems);
+    
+    if (Debug.RenderPoints)
+        gl.drawArrays(gl.POINTS, 0, this.NumItems);
 }

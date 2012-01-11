@@ -9,23 +9,26 @@ function LineLoop(verticeSize, vertices)
     this.BoundingRadius = Help.GetBufferBoundingRadius(vertices, verticeSize);
     this.ConvexePolys = (new EarclipDecomposer()).ConvexPartitionFromBuffer(vertices, verticeSize);
     
-    var convexeBuffs = [];
-    
-    for(var i = 0; i < this.ConvexePolys.length; ++i)
-    {
-        var len = this.ConvexePolys[i].length;
-        var bufferData = Help.ConvertVectorArrayToVertexBuffer( this.ConvexePolys[i] );
-        var buffer = gl.createBuffer();
-        
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);					
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bufferData), gl.STATIC_DRAW);
-        
-        convexeBuffs.push( { count : len, buff : buffer });
-    }
-    
     gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexBuffer);					
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
+    
+    //create buffers for rendering the physics primitives
+    var convexeBuffs = [];
+    if (Debug.RenderPhysics)
+    {
+        for(var i = 0; i < this.ConvexePolys.length; ++i)
+        {
+            var len = this.ConvexePolys[i].length;
+            var bufferData = Help.ConvertVectorArrayToVertexBuffer( this.ConvexePolys[i] );
+            var buffer = gl.createBuffer();
+            
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);					
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bufferData), gl.STATIC_DRAW);
+            
+            convexeBuffs.push( { count : len, buff : buffer });
+        }
+    }
+    
     this.Draw = function(program, color)
     {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexBuffer);
@@ -34,16 +37,23 @@ function LineLoop(verticeSize, vertices)
         program.SetColor(color);
         
         gl.drawArrays(gl.LINE_LOOP, 0, this.NumItems);
-        gl.drawArrays(gl.POINTS, 0, this.NumItems);
         
-        for(var i = 0; i < convexeBuffs.length; ++i)
+        if (Debug.RenderPoints)
         {
-            gl.bindBuffer(gl.ARRAY_BUFFER, convexeBuffs[i].buff);
-            gl.enableVertexAttribArray(program.AttribPos);
-            gl.vertexAttribPointer(program.AttribPos, 3, gl.FLOAT, false, 0, 0);
-            program.SetColor([1, 0, 0, 1]);
-            
-            gl.drawArrays(gl.LINE_LOOP, 0, convexeBuffs[i].count);
+            gl.drawArrays(gl.POINTS, 0, this.NumItems);
+        }
+        
+        if (Debug.RenderPhysics)
+        {
+            for(var i = 0; i < convexeBuffs.length; ++i)
+            {
+                gl.bindBuffer(gl.ARRAY_BUFFER, convexeBuffs[i].buff);
+                gl.enableVertexAttribArray(program.AttribPos);
+                gl.vertexAttribPointer(program.AttribPos, 3, gl.FLOAT, false, 0, 0);
+                program.SetColor([1, 0, 0, 1]);
+                
+                gl.drawArrays(gl.LINE_LOOP, 0, convexeBuffs[i].count);
+            }
         }
     }
     

@@ -2,17 +2,18 @@
 
 function World()
 {
+    var canvas = document.getElementById("world");
+    
     //Member Variables
     this.GameObjects = [];
-    this.DESIRED_SIZE = 250;
     this.DesiredAspectRatio = 1;
-    this.HalfSize = [this.DESIRED_SIZE / this.DesiredAspectRatio, this.DESIRED_SIZE * this.DesiredAspectRatio];
+    this.HalfSize = [0.5 * canvas.width, 0.5 * canvas.height];
     
     //debug
     this.Culled = 0;
+    this.FPS = 0;
     
-    //Private Initialisation    
-    var canvas = document.getElementById("world");
+    //Private Initialisation
     //THIS SHIT BE GLOBAL!
     gl = WebGLUtils.setupWebGL(canvas, {premultipliedAlpha: false});    
     if (!gl)
@@ -38,6 +39,10 @@ function World()
     this.CreateAsteroid = function()
     {
         var created = CreateAsteroid(50, 20);
+        created.AngularVelocity = (Math.random() - 0.5) * 0.4 * Math.PI;
+        
+        var maxSpeed = 50;
+        created.Velocity = new Vector(maxSpeed * (Math.random() - 0.5), maxSpeed * (Math.random() - 0.5));
         //var created = new LineDebris([0, 0, 0, 100, 100, 0], 3);
         this.GameObjects.push( created );
         return created;
@@ -122,6 +127,7 @@ function World()
     {
         var now = new Date().getTime();
         var dt = (now - last) / 1000.0;
+        this.FPS = dt != 0 ? 1 / dt : "N/A";
         last = now;
     
         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -156,10 +162,14 @@ function World()
     {
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
-    
-        var aspectRatio = canvas.clientWidth / canvas.clientHeight;
+        this.HalfSize = [0.5 * canvas.width, 0.5 * canvas.height];
     
         gl.viewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+        
+        asteroidShader.Enable();
+        var Projection = mat4.create();
+        mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
+        asteroidShader.SetProjection(Projection);
     }
     
     //initialise render window

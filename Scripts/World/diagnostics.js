@@ -24,5 +24,12 @@ Debug.RefreshDiagnostics = function()
         statistic.innerHTML = count;
     }
     
+    statistic = document.getElementById("fps");
+    if (statistic)
+    {
+        statistic.innerHTML = g_World.FPS;
+    }
+
+    
     setTimeout("Debug.RefreshDiagnostics()", 500);
 }

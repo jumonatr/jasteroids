@@ -3,7 +3,7 @@
     this.Position = new Vector([0, 0]);
     this.Angle = 0;
     this.Velocity = new Vector([0 , 0]);
-    this.AngularVelocity = 0.1 * Math.PI;
+    this.AngularVelocity = 0;
     this.IsAlive = true;
 }
 
