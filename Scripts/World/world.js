@@ -3,17 +3,18 @@
 function World()
 {
     //Member Variables
-    this.Asteroids = [];
+    this.GameObjects = [];
     this.DESIRED_SIZE = 250;
     this.DesiredAspectRatio = 1;
     this.HalfSize = [this.DESIRED_SIZE / this.DesiredAspectRatio, this.DESIRED_SIZE * this.DesiredAspectRatio];
     
+    //debug
+    this.Culled = 0;
+    
     //Private Initialisation    
     var canvas = document.getElementById("world");
-    var gl = WebGLUtils.setupWebGL(canvas);
-    var debugTimer = setTimeout("g_World.RefreshDiagnostics()", 500);
-    var culled = 0;
-    
+    //THIS SHIT BE GLOBAL!
+    gl = WebGLUtils.setupWebGL(canvas, {premultipliedAlpha: false});    
     if (!gl)
     {
         alert("Error creating WebGL context");
@@ -23,59 +24,23 @@ function World()
     gl.clearColor(0,0,0,1);
     gl.disable( gl.CULL_FACE );
     gl.lineWidth( 2 );
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     
-    var asteroidShader = CreateSimpleShader(gl);
+    var asteroidShader = CreateSimpleShader();
 
     var Projection = mat4.create();
     mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
     asteroidShader.SetProjection(Projection);
+    
+    setTimeout("Debug.RefreshDiagnostics()", 500);
 
     //Functions
-    this.RefreshDiagnostics = function()
-    {
-        var statistic = document.getElementById("asteroidCount");
-        if (statistic)
-        {
-            statistic.innerHTML = this.Asteroids.length;
-        }
-        
-        statistic = document.getElementById("culled");
-        if (statistic)
-        {
-            statistic.innerHTML = culled;
-        }
-        
-        statistic = document.getElementById("verts");
-        if (statistic)
-        {
-            var count = 0;
-            for(var i = 0; i < this.Asteroids.length; ++i)
-                count += this.Asteroids[i].LineBuffer.NumItems;
-                
-            statistic.innerHTML = count;
-        }
-        
-        debugTimer = setTimeout("g_World.RefreshDiagnostics()", 500);
-    }
-    
     this.CreateAsteroid = function()
     {
-        var created = CreateAsteroid(gl, 50, 20);
-        this.Asteroids.push( created );
+        var created = CreateAsteroid(50, 20);
+        //var created = new LineDebris([0, 0, 0, 100, 100, 0], 3);
+        this.GameObjects.push( created );
         return created;
-    }
-
-    function FindAsteroidsAtPoint(x, y)
-    {
-        var worldPos = [x, y];
-        var found = [];
-        for(var i = this.Asteroids.length - 1; i >= 0; --i)
-        {
-            if (!this.Asteroids[i].ContainsPoint(worldPos))
-                continue;
-                
-            found.push(this.Asteroids[i]);
-        }
     }
     
     this.Clicked = function(canvas, event)
@@ -98,35 +63,41 @@ function World()
             return;
         }
                 
-        for(var i = this.Asteroids.length - 1; i >= 0; --i)
+        for(var i = this.GameObjects.length - 1; i >= 0; --i)
         {
-            if (this.Asteroids[i].ContainsPoint( worldPos ))
+            if (this.GameObjects[i].ContainsPoint && this.GameObjects[i].ContainsPoint( worldPos ))
             {
-                //this.DestroyAsteroid(i);
-                this.Asteroids[i].SetPosition( worldPos );
+                this.DestroyAsteroid(i);
+                //this.GameObjects[i].Position = worldPos;
             }
         }        
     }
     
     this.DestroyAsteroid = function(index)
     {
-        var split = this.Asteroids[index].BreakInTwo();
-        this.Asteroids.splice(index, 1);
+        var split = this.GameObjects[index].BreakInTwo();
+        this.GameObjects.splice(index, 1);
         
         for(var j = 0; j < split.length; ++j)
-            this.Asteroids.push(split[j]);
+            this.GameObjects.push(split[j]);
     }
     
     this.CheckCollisions = function()
     {
         var toDestroy = [];
-        var len = this.Asteroids.length;
+        var len = this.GameObjects.length;
         for(var i = len - 1; i >= 0; --i)
         {
+            if (! (this.GameObjects[i] instanceof Asteroid) )
+                continue;
+                
             var hit = false;
             for(var j = i - 1; j >= 0; --j)
             {
-                if (!this.Asteroids[i].CollidesWith(this.Asteroids[j]))
+                if (! (this.GameObjects[j] instanceof Asteroid) )
+                    continue;
+
+                if (!this.GameObjects[i].CollidesWith(this.GameObjects[j]))
                     continue;
                 
                 toDestroy.push(j);
@@ -156,16 +127,23 @@ function World()
         gl.clear(gl.COLOR_BUFFER_BIT);
         
         asteroidShader.Enable();
-        culled = this.Asteroids.length;
-        for (var i = this.Asteroids.length - 1; i >= 0; i--)
+        this.Culled = this.GameObjects.length;
+        var worldSize = [[ -this.HalfSize[0], -this.HalfSize[1] ], [ this.HalfSize[0], this.HalfSize[1] ]];
+        var lastIdx = this.GameObjects.length - 1;
+        for (var i = lastIdx; i >= 0; i--)
         {
-            this.Asteroids[i].Update(dt);
+            this.GameObjects[i].Update(dt);
             
-            if ( Physics.CircleInBox(this.Asteroids[i].Position, this.Asteroids[i].LineBuffer.BoundingRadius,
-                                    [ -this.HalfSize[0], -this.HalfSize[1] ], [ this.HalfSize[0], this.HalfSize[1] ]) )
+            if (!this.GameObjects[i].IsAlive)
             {
-                this.Asteroids[i].Draw(asteroidShader);
-                culled--;
+                this.GameObjects.splice(i, 1);
+                continue;
+            }
+            
+            if ( this.GameObjects[i].IsVisible(worldSize[0], worldSize[1]) )
+            {
+                this.GameObjects[i].Draw(asteroidShader);
+                this.Culled--;
             }
         }
         

@@ -16,7 +16,10 @@
 		<script src="Scripts/Physics/projection.js" type="text/javascript"></script>
 		<script src="Scripts/Physics/earclip_decomposer.js" type="text/javascript"></script>
 		
+		<script src="Scripts/World/gameobject.js" type="text/javascript"></script>
+		<script src="Scripts/World/linedebris.js" type="text/javascript"></script>
 		<script src="Scripts/World/asteroid.js" type="text/javascript"></script>
+		<script src="Scripts/World/diagnostics.js" type="text/javascript"></script>
 		<script src="Scripts/Rendering/shaders.js" type="text/javascript"></script>
 		
 		<script src="Scripts/World/world.js" type="text/javascript"></script>
@@ -49,7 +52,7 @@
 		<canvas id="world" onclick="g_World.Clicked(this, event)">
 		</canvas>
 		<div id="diagnostics">
-		    <div>Asteroids: <span id="asteroidCount">-</span></div>
+		    <div>GameObjects: <span id="asteroidCount">-</span></div>
 		    <div>Culled: <span id="culled">-</span></div>
 		    <div>Vertices: <span id="verts">-</span></div>
 		</div>

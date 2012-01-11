@@ -1,12 +1,12 @@
-﻿function CreateSimpleShader(gl)
+﻿function CreateSimpleShader()
 {
-    return _CreateShader(gl, "simpleVertex", "simpleFragment");
+    return _CreateShader("simpleVertex", "simpleFragment");
 }
 
 //private helper functions ahead
 
 //http://learningwebgl.com/blog/?p=28
-function GetShader(gl, id)
+function GetShader(id)
 {
   var shaderScript = document.getElementById(id);
   if (!shaderScript)
@@ -43,10 +43,10 @@ function GetShader(gl, id)
   return shader;
 }
 
-function _CreateProgram(gl, vs_source_id, fs_source_id)
+function _CreateProgram(vs_source_id, fs_source_id)
 {
-    var vs = GetShader(gl, vs_source_id);
-    var fs = GetShader(gl, fs_source_id);
+    var vs = GetShader(vs_source_id);
+    var fs = GetShader(fs_source_id);
     
     var program = gl.createProgram();
     gl.attachShader(program , vs);
@@ -60,9 +60,9 @@ function _CreateProgram(gl, vs_source_id, fs_source_id)
 }
 
 
-function _CreateShader(gl, vs_source_id, fs_source_id)
+function _CreateShader(vs_source_id, fs_source_id)
 {
-    var program = _CreateProgram(gl, vs_source_id, fs_source_id);
+    var program = _CreateProgram(vs_source_id, fs_source_id);
     	
     gl.useProgram(program);
     	

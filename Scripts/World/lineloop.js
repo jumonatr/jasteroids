@@ -1,6 +1,6 @@
 ﻿//Line Buffer class used to keep vertices and draw them as a line_loop
 
-function LineLoop(gl, verticeSize, vertices)
+function LineLoop(verticeSize, vertices)
 {
     this.NumItems = vertices.length / verticeSize;
     this.VertexBuffer = gl.createBuffer();
@@ -139,6 +139,6 @@ function LineLoop(gl, verticeSize, vertices)
         var toAddSecond = Help.Center( second.slice(0, 2 * verticeSize), verticeSize);
         second.splice(verticeSize, 0, toAddSecond[0], toAddSecond[1], toAddSecond[2]);
         
-        return [ new LineLoop(gl, verticeSize, first), new LineLoop(gl, verticeSize, second) ];
+        return [ new LineLoop(verticeSize, first), new LineLoop(verticeSize, second) ];
     }
 }

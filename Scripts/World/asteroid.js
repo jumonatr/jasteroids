@@ -1,105 +1,129 @@
 ﻿
-function CreateAsteroid(gl, max_size, min_size)
+function CreateAsteroid(max_size, min_size)
 {
     var vertices = CreateAsteroidVerts(20, 6, max_size, min_size);
     //var vertices = CreateAsteroidVerts(6, 6, 250, 250);
-    var lineBuffer = new LineLoop(gl, 3, vertices);
+    var lineBuffer = new LineLoop(3, vertices);
 
     return new Asteroid(lineBuffer);
 }
 
+Asteroid.prototype = new GameObject();
+Asteroid.prototype.Update = GameObject.prototype.UpdateMouvement;
+
 function Asteroid(lineBuffer, position, angle)
-{
-    //private variables
-    var transform = mat4.create();
-    var color = Help.Colors.WHITE;
-    
+{    
     //init
-    this.Position = new Vector(position ? position : [0, 0]);
-    this.Angle = angle ? angle : 0;
-    this.Velocity = new Vector([0 , 0]);
-    this.AngularVelocity = 0.1 * Math.PI;
+    if (position)
+        this.Position = position;
+        
+    if (angle)
+        this.Angle = angle;
+    
     this.LineBuffer = lineBuffer;
     this.CreationTime = (new Date()).getTime();
-    this.Color = Help.Colors.WHITE;
-
-    this.Update = function(dt)
-    {
-        this.Angle += dt * this.AngularVelocity;
-        this.Position = this.Position.Add( [dt * this.Velocity[0], dt * this.Velocity[1], 0]);
-    }
-    
-    this.Draw = function(program)
-    {
-        var transform = this.GetTransform();
-
-        program.SetWorld(transform);
-        program.SetColor(color);
-        
-        lineBuffer.Draw(program, this.Color);
-    }
-    
-    this.SetPosition = function(vec)
-    {
-        this.Position = vec;
-    }
-    
-    this.GetTransform = function()
-    {
-        var transform = mat4.create();
-        mat4.identity(transform);
-        mat4.translate(transform, this.Position);
-        mat4.rotate(transform, this.Angle, Vector.UNIT_Z);
-        
-        return transform;
-    }
-    
-    this.ContainsPoint = function(point)
-    {
-        return lineBuffer.ContainsPoint(point, this.GetTransform());
-    }
-    
-    this.CollidesWith = function(other)
-    {
-        var now = new Date().getTime();
-        var dt = (now - this.CreationTime) / 1000.0;
-        if (dt < 0.2)
-            return false;
-    
-        if ( !this.LineBuffer.CrudeCollidesWith(this.Position, other.LineBuffer, other.Position) )
-            return false;
-
-        return this.LineBuffer.CollidesWith(this.GetTransform(), other.LineBuffer, other.GetTransform());
-    }
-    
-    this.BreakInTwo = function()
-    {
-        var childLineBuffers = lineBuffer.SplitInTwo();
-        if (!childLineBuffers)
-            return [];
-            
-        var children = [ new Asteroid(childLineBuffers[0], this.Position, this.Angle), new Asteroid(childLineBuffers[1], this.Position, this.Angle) ];
-        var transform = this.GetTransform();
-        
-        var centerOne = Help.Center(childLineBuffers[0].Vertices, childLineBuffers[0].VertexSize);
-        mat4.multiplyVec3(transform, centerOne);
-        
-        var centerTwo = Help.Center(childLineBuffers[1].Vertices, childLineBuffers[1].VertexSize);
-        mat4.multiplyVec3(transform, centerTwo);
-        
-        var toTwo = new Vector(centerOne).Subtract(centerTwo);
-        toTwo = toTwo.Normalise().Multiply(10);
-        
-        
-        var toOne = toTwo.Multiply(-1);
-        toOne = toOne.Normalise().Multiply(10);
-        
-        children[0].Velocity = toTwo;
-        children[1].Velocity = toOne;
-
-        return children;
-    }
+    this.Color = Help.Colors.WHITE;       
 }
+
+Asteroid.prototype.IsVisible = function(lowerLeft, topRight)
+{
+    return Physics.CircleInBox(this.Position, this.LineBuffer.BoundingRadius, lowerLeft, topRight);
+}
+
+Asteroid.prototype.Draw = function(program)
+{
+    var transform = this.GetTransform();
+
+    program.SetWorld(transform);        
+    this.LineBuffer.Draw(program, this.Color);
+}
+
+Asteroid.prototype.GetTransform = function()
+{
+    var transform = mat4.create();
+    mat4.identity(transform);
+    mat4.translate(transform, this.Position);
+    mat4.rotate(transform, this.Angle, Vector.UNIT_Z);
+    
+    return transform;
+}
+
+Asteroid.prototype.ContainsPoint = function(point)
+{
+    return this.LineBuffer.ContainsPoint(point, this.GetTransform());
+}
+
+Asteroid.prototype.CollidesWith = function(other)
+{
+    var now = new Date().getTime();
+    var dt = (now - this.CreationTime) / 1000.0;
+    if (dt < 0.2)
+        return false;
+
+    if ( !this.LineBuffer.CrudeCollidesWith(this.Position, other.LineBuffer, other.Position) )
+        return false;
+
+    return this.LineBuffer.CollidesWith(this.GetTransform(), other.LineBuffer, other.GetTransform());
+}
+
+Asteroid.prototype.BreakInTwo = function()
+{
+    var childLineBuffers = this.LineBuffer.SplitInTwo();
+    if (!childLineBuffers)
+        return BreakIntoLines(this);
+        
+    var children = [ new Asteroid(childLineBuffers[0], this.Position, this.Angle), new Asteroid(childLineBuffers[1], this.Position, this.Angle) ];
+    var transform = this.GetTransform();
+    
+    var centerOne = Help.Center(childLineBuffers[0].Vertices, childLineBuffers[0].VertexSize);
+    mat4.multiplyVec3(transform, centerOne);
+    
+    var centerTwo = Help.Center(childLineBuffers[1].Vertices, childLineBuffers[1].VertexSize);
+    mat4.multiplyVec3(transform, centerTwo);
+    
+    var toTwo = new Vector(centerOne).Subtract(centerTwo);
+    toTwo = toTwo.Normalise().Multiply(10);
+    
+    var toOne = toTwo.Multiply(-1);
+    toOne = toOne.Normalise().Multiply(10);
+    
+    children[0].Velocity = toTwo;
+    children[1].Velocity = toOne;
+
+    return children;
+}
+
+function BreakIntoLines(asteroid)
+{
+    function CreateLine(verts, vertSize)
+    {
+        var creation = new LineDebris(verts, vertSize);
+        creation.Position = new Vector(asteroid.Position);
+        creation.Velocity = asteroid.Velocity.Multiply(Math.random() * 2);
+        
+        creation.Angle = asteroid.Angle;
+        creation.AngularVelocity = asteroid.AngularVelocity * Math.random() * 2;
+        return creation;
+    }
+
+    var lines = [];
+    //function LineDebris(vertices, verticeSize)
+    var verts = asteroid.LineBuffer.Vertices;
+    var len = asteroid.LineBuffer.NumItems;
+    var vertSize = asteroid.LineBuffer.VertexSize;
+    for(var i = 0; i < len; ++i)
+    {
+        var lineVerts = verts.slice(vertSize * i, vertSize * (i + 2));
+        lines.push(CreateLine(lineVerts, vertSize));
+    }
+    
+    var endVerts = verts.slice(vertSize * (len - 1), vertSize * len);
+    Help.AddRange(endVerts, verts.slice(0, vertSize));
+    lines.push(CreateLine(endVerts, vertSize));
+    
+    return lines;
+}
+
 
 function CreateAsteroidVerts(max_amount, min_amount, max_radius, min_radius)
 {
