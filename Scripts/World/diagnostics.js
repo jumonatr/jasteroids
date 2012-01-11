@@ -33,3 +33,5 @@ Debug.RefreshDiagnostics = function()
     
     setTimeout("Debug.RefreshDiagnostics()", 500);
 }
+
+setTimeout("Debug.RefreshDiagnostics()", 500);

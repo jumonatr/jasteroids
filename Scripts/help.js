@@ -39,6 +39,21 @@ Array.prototype.unique = function()
     return r;
 }
 
+Array.prototype.remove = function(item)
+{
+    var len = this.length;
+    for( var i = 0; i < len; ++i)
+    {
+        if (this[i] != item)
+            continue;
+        
+        this.splice(i, 1);
+        return true;
+    }
+    
+    return false;
+}
+
 Help.AddRange = function(array, toAdd)
 {
     var len = toAdd.length;
@@ -342,3 +357,17 @@ function Test_NumberClamp()
     SimpleTest.Equals( 0.5, (0.5).clamp(0, 1) );
 }
 
+function Test_ArrayRemove()
+{
+    var ar = [0, 1, 2, 3];
+    ar.remove(1);
+    SimpleTest.Equals([0, 2, 3], ar);
+    ar.remove(0);
+    SimpleTest.Equals([2, 3], ar);
+    ar.remove(3);
+    SimpleTest.Equals([2], ar);
+    ar.remove(2);
+    SimpleTest.Equals([], ar);
+    
+    SimpleTest.Equals(false, ar.remove(2));
+}

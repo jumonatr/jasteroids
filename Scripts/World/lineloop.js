@@ -151,4 +151,35 @@ function LineLoop(verticeSize, vertices)
         
         return [ new LineLoop(verticeSize, first), new LineLoop(verticeSize, second) ];
     }
+    
+    this.SplitIntoLines = function(position, velocity, angle, angularVelocity)
+    {
+        function CreateLine(verts, vertSize)
+        {
+            var creation = new LineDebris(verts, vertSize);
+            creation.Position = new Vector(position);
+            creation.Velocity = velocity.Multiply(Math.random() * 2);
+            
+            creation.Angle = angle;
+            creation.AngularVelocity = angularVelocity * Math.random() * 2;
+            return creation;
+        }
+    
+        var lines = [];
+        //function LineDebris(vertices, verticeSize)
+        var verts = this.Vertices;
+        var len = this.NumItems;
+        var vertSize = this.VertexSize;
+        for(var i = 0; i < len; ++i)
+        {
+            var lineVerts = verts.slice(vertSize * i, vertSize * (i + 2));
+            lines.push(CreateLine(lineVerts, vertSize));
+        }
+        
+        var endVerts = verts.slice(vertSize * (len - 1), vertSize * len);
+        Help.AddRange(endVerts, verts.slice(0, vertSize));
+        lines.push(CreateLine(endVerts, vertSize));
+        
+        return lines;
+    }
 }

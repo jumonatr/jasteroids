@@ -8,7 +8,7 @@ function LineDebris(vertices, verticeSize)
     this.Buffer = gl.createBuffer();
     this.VerticeSize = verticeSize;
     this.NumItems = vertices.length / verticeSize;
-    this.LifeSpan = Math.random() * 10 + 1;
+    this.LifeSpan = Math.random() * Data.MaxDebrisLifeSpan + 1;
     this.CreationTime = (new Date()).getTime();
     
     gl.bindBuffer(gl.ARRAY_BUFFER, this.Buffer);

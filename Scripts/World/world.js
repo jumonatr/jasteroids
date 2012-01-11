@@ -7,13 +7,16 @@ function World()
     
     //Member Variables
     this.GameObjects = [];
+    this.Asteroids = [];
+    this.Bullets = [];
+    
     this.DesiredAspectRatio = 1;
     this.HalfSize = [0.5 * canvas.width, 0.5 * canvas.height];
     
     //debug
     this.Culled = 0;
     this.FPS = 0;
-    
+
     //Private Initialisation
     //THIS SHIT BE GLOBAL!
     gl = WebGLUtils.setupWebGL(canvas, {premultipliedAlpha: false});    
@@ -32,24 +35,8 @@ function World()
     var Projection = mat4.create();
     mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
     asteroidShader.SetProjection(Projection);
-    
-    setTimeout("Debug.RefreshDiagnostics()", 500);
 
-    //Functions
-    this.CreateAsteroid = function()
-    {
-        var created = CreateAsteroid(50, 20);
-        created.AngularVelocity = (Math.random() - 0.5) * 0.4 * Math.PI;
-        
-        var maxSpeed = 50;
-        created.Velocity = new Vector(maxSpeed * (Math.random() - 0.5), maxSpeed * (Math.random() - 0.5));
-
-        //var created = new LineDebris([0, 0, 0, 100, 100, 0], 3);
-        //var created = new Ship();
-        this.GameObjects.push( created );
-        return created;
-    }
-    
+    //Functions    
     this.Clicked = function(canvas, event)
     {
         if (canvas.width == 0 || canvas.height == 0)
@@ -74,56 +61,11 @@ function World()
         {
             if (this.GameObjects[i].ContainsPoint && this.GameObjects[i].ContainsPoint( worldPos ))
             {
-                this.DestroyAsteroid(i);
-                //this.GameObjects[i].Position = worldPos;
+                this.DestroyGameObject(i);
             }
         }        
     }
-    
-    this.DestroyAsteroid = function(index)
-    {
-        var split = this.GameObjects[index].BreakInTwo();
-        this.GameObjects.splice(index, 1);
         
-        for(var j = 0; j < split.length; ++j)
-            this.GameObjects.push(split[j]);
-    }
-        
-    this.CheckCollisions = function()
-    {
-        var toDestroy = [];
-        var len = this.GameObjects.length;
-        for(var i = len - 1; i >= 0; --i)
-        {
-            if (!this.GameObjects[i].CollidesWith)
-                continue;
-                
-            var hit = false;
-            for(var j = i - 1; j >= 0; --j)
-            {
-                if (! this.GameObjects[j].CollidesWith )
-                    continue;
-
-                if (!this.GameObjects[i].CollidesWith(this.GameObjects[j]))
-                    continue;
-                
-                toDestroy.push(j);
-                hit = true;
-            }
-            
-            if (hit)
-                toDestroy.push(i);
-        }
-        
-        if (toDestroy.length == 0)
-            return;
-        
-        toDestroy = toDestroy.unique();
-        
-        for(var i = toDestroy.length - 1; i >= 0; --i)
-            this.DestroyAsteroid(toDestroy[i]);
-    }
-    
     var last = new Date().getTime();
     this.Update = function()
     {
@@ -144,7 +86,7 @@ function World()
             
             if (!this.GameObjects[i].IsAlive)
             {
-                this.GameObjects.splice(i, 1);
+                this.DestroyGameObject(i);
                 continue;
             }
             
@@ -179,16 +121,116 @@ function World()
     
     //create world objects
     this.CreateAsteroid();
-    this.GameObjects.push( new Ship() );
+    this.CreatePlayer();
     
     //Start Main Loop
     this.Update();
 }
 
+World.prototype.CreateAsteroid = function()
+{
+    var created = CreateAsteroid(50, 20);
+    created.AngularVelocity = (Math.random() - 0.5) * 0.4 * Math.PI;
+    
+    var maxSpeed = 50;
+    created.Velocity = new Vector(maxSpeed * (Math.random() - 0.5), maxSpeed * (Math.random() - 0.5));
+
+    //var created = new LineDebris([0, 0, 0, 100, 100, 0], 3);
+    //var created = new Ship();
+    this.SpawnGameObject(created);
+    return created;
+}
+
+World.prototype.CreatePlayer = function()
+{
+    this.SpawnGameObject( new Ship() );
+}
+
+
 World.prototype.GetBounds = function()
 {
     return [[ -this.HalfSize[0], -this.HalfSize[1] ], [ this.HalfSize[0], this.HalfSize[1] ]];
 }
+
+World.prototype.SpawnGameObject = function(toSpawn)
+{
+    if (toSpawn instanceof Asteroid)
+        this.Asteroids.push(toSpawn);
+    else if (toSpawn instanceof Bullet)
+        this.Bullets.push(toSpawn);
+    
+    this.GameObjects.push(toSpawn);
+}
+
+World.prototype.DestroyGameObject = function(index)
+{
+    var go = this.GameObjects[index];
+    if (go instanceof Ship)
+        return; //invulnerable for now
+
+    this.GameObjects.splice(index, 1);
+            
+    if (go instanceof Asteroid)
+        this.Asteroids.remove(go);
+    else if (go instanceof Bullet)
+        this.Bullets.remove(go);
+    
+    if (go.Break)
+    {
+        var split = go.Break();
+        for(var j = 0; j < split.length; ++j)
+            this.SpawnGameObject(split[j]);
+    }
+}
+        
+World.prototype.CheckCollisions = function()
+{
+    var toDestroy = [];
+    var len = this.GameObjects.length;
+    for(var i = len - 1; i >= 0; --i)
+    {
+        if (!this.GameObjects[i].CollidesWith)
+            continue;
+            
+        var hit = false;
+        for(var j = i - 1; j >= 0; --j)
+        {
+            if (! this.GameObjects[j].CollidesWith )
+                continue;
+
+            if (!this.GameObjects[i].CollidesWith(this.GameObjects[j]))
+                continue;
+            
+            toDestroy.push(j);
+            hit = true;
+        }
+        
+        if (hit)
+            toDestroy.push(i);
+    }
+    
+    for(var b = this.Bullets.length - 1; b >= 0; --b)
+    {
+        for(var i = this.GameObjects.length - 1; i >= 0; --i)
+        {
+            if (this.GameObjects[i].ContainsPoint && 
+                this.GameObjects[i].ContainsPoint( this.Bullets[b].Position ))
+            {
+                toDestroy.push(i);
+                Statistics.AsteroidKilled();
+            }
+        }
+    }
+    
+    if (toDestroy.length == 0)
+        return;
+    
+    toDestroy = toDestroy.unique();
+    
+    for(var i = toDestroy.length - 1; i >= 0; --i)
+        this.DestroyGameObject(toDestroy[i]);
+}
+
 
 
 World.Init = function()
