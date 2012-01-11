@@ -9,7 +9,6 @@ function CreateAsteroid(max_size, min_size)
 }
 
 Asteroid.prototype = new GameObject();
-Asteroid.prototype.Update = GameObject.prototype.UpdateMouvement;
 
 function Asteroid(lineBuffer, position, angle)
 {    
@@ -21,13 +20,20 @@ function Asteroid(lineBuffer, position, angle)
         this.Angle = angle;
 
     this.LineBuffer = lineBuffer;
+    this.Radius = this.LineBuffer.BoundingRadius;
     this.CreationTime = (new Date()).getTime();
     this.Color = Help.Colors.WHITE;       
 }
 
 Asteroid.prototype.IsVisible = function(lowerLeft, topRight)
 {
-    return Physics.CircleInBox(this.Position, this.LineBuffer.BoundingRadius, lowerLeft, topRight);
+    return Physics.CircleInBox(this.Position, this.Radius, lowerLeft, topRight);
+}
+
+Asteroid.prototype.Update = function(dt)
+{
+    this.UpdateMouvement(dt);
+    this.StayInWorld(dt);
 }
 
 Asteroid.prototype.Draw = function(program)

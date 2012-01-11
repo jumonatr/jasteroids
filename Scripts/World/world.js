@@ -2,6 +2,7 @@
 
 function World()
 {
+    g_World = this;
     var canvas = document.getElementById("world");
     
     //Member Variables
@@ -17,10 +18,9 @@ function World()
     //THIS SHIT BE GLOBAL!
     gl = WebGLUtils.setupWebGL(canvas, {premultipliedAlpha: false});    
     if (!gl)
-    {
-        alert("Error creating WebGL context");
         return;
-    }
+    
+    document.getElementById("nowebgl").style.display = "none";
     
     gl.clearColor(0,0,0,1);
     gl.disable( gl.CULL_FACE );
@@ -86,7 +86,7 @@ function World()
         for(var j = 0; j < split.length; ++j)
             this.GameObjects.push(split[j]);
     }
-    
+        
     this.CheckCollisions = function()
     {
         var toDestroy = [];
@@ -134,7 +134,7 @@ function World()
         
         asteroidShader.Enable();
         this.Culled = this.GameObjects.length;
-        var worldSize = [[ -this.HalfSize[0], -this.HalfSize[1] ], [ this.HalfSize[0], this.HalfSize[1] ]];
+        var worldSize = this.GetBounds();
         var lastIdx = this.GameObjects.length - 1;
         for (var i = lastIdx; i >= 0; i--)
         {
@@ -181,6 +181,12 @@ function World()
     //Start Main Loop
     this.Update();
 }
+
+World.prototype.GetBounds = function()
+{
+    return [[ -this.HalfSize[0], -this.HalfSize[1] ], [ this.HalfSize[0], this.HalfSize[1] ]];
+}
+
 
 World.Init = function()
 {

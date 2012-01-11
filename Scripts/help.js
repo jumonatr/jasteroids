@@ -25,6 +25,11 @@ Number.prototype.sign = function() {
   }
 }
 
+Number.prototype.clamp = function(min, max)
+{
+    return Math.max(min, Math.min(this, max));
+}
+
 //http://www.shamasis.net/2009/09/fast-algorithm-to-find-unique-items-in-javascript-array/
 Array.prototype.unique = function()
 {
@@ -328,6 +333,12 @@ function Test_IsCounterClockwise()
     ];
     
     TestCounter(shape, false);
+}
 
+function Test_NumberClamp()
+{
+    SimpleTest.Equals( 1, (10).clamp(0, 1) );
+    SimpleTest.Equals( 0, (-1).clamp(0, 1) );
+    SimpleTest.Equals( 0.5, (0.5).clamp(0, 1) );
 }
 
