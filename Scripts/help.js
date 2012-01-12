@@ -73,6 +73,14 @@ Help.CircularLoop = function(array, func)
     }
 }
 
+Help.CallIn = function(milliseconds, self, func)
+{
+    setTimeout(function()
+    {
+        self[func]();
+    }, milliseconds);
+}
+
 Help.ConvertVertexBufferToVectorArray = function(verticeBuffer, verticeSize)
 {
     var vectorBuffer = [];

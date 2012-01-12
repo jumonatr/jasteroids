@@ -64,9 +64,17 @@ Asteroid.prototype.CollidesWith = function(other)
 
 Asteroid.prototype.Break = function()
 {
+    try
+    {
     var childShapes = this.Shape.SplitInTwo();
     if (!childShapes)
         return this.Shape.SplitIntoLines(this.Position, this.Velocity, this.Angle, this.AngularVelocity);
+    }
+    catch(e)
+    {
+        console.error("Failed to split shape in asteroid, falling back to split into lines: " + e);
+        return this.Shape.SplitIntoLines(this.Position, this.Velocity, this.Angle, this.AngularVelocity);
+    }
         
     var children = [ new Asteroid(childShapes[0], this.Position, this.Angle), new Asteroid(childShapes[1], this.Position, this.Angle) ];
     var transform = this.GetTransform();

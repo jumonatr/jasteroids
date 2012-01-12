@@ -1,6 +1,6 @@
 ﻿var g_World = null;
 
-function World()
+function World(game)
 {
     g_World = this;
     var canvas = document.getElementById("world");
@@ -120,19 +120,20 @@ function World()
     this.Resized();
     
     //create world objects
-    this.CreateAsteroid();
+    //this.CreateAsteroid();
     this.CreatePlayer();
     
     //Start Main Loop
     this.Update();
+    game.Start();
 }
 
 World.prototype.CreateAsteroid = function()
 {
-    var created = CreateAsteroid(50, 20);
+    var created = CreateAsteroid(Data.MaxAsteroidSize, Data.MinAsteroidSize);
     created.AngularVelocity = (Math.random() - 0.5) * 0.4 * Math.PI;
     
-    var maxSpeed = 50;
+    var maxSpeed = Data.MaxAsteroidSpeed;
     created.Velocity = new Vector(maxSpeed * (Math.random() - 0.5), maxSpeed * (Math.random() - 0.5));
 
     //var created = new LineDebris([0, 0, 0, 100, 100, 0], 3);
@@ -162,13 +163,21 @@ World.prototype.SpawnGameObject = function(toSpawn)
     this.GameObjects.push(toSpawn);
 }
 
-World.prototype.DestroyGameObject = function(index)
+World.prototype.DestroyGameObject = function(element)
 {
-    var go = this.GameObjects[index];
+    var go;
+    if (typeof(element) == "number")
+        go = this.GameObjects[element];
+    else
+        go = element;
+   
     if (go instanceof Ship)
         return; //invulnerable for now
 
-    this.GameObjects.splice(index, 1);
+    if (typeof(element) == "number")
+        this.GameObjects.splice(element, 1);
+    else
+        this.GameObjects.remove(go);
             
     if (go instanceof Asteroid)
         this.Asteroids.remove(go);
@@ -209,17 +218,24 @@ World.prototype.CheckCollisions = function()
             toDestroy.push(i);
     }
     
-    for(var b = this.Bullets.length - 1; b >= 0; --b)
+    var lastBullet = this.Bullets.length - 1;
+    var lastGo = this.GameObjects.length - 1;
+    for(var b = lastBullet; b >= 0; --b)
     {
-        for(var i = this.GameObjects.length - 1; i >= 0; --i)
+        var collided = false;
+        for(var i = lastGo; i >= 0; --i)
         {
             if (this.GameObjects[i].ContainsPoint && 
                 this.GameObjects[i].ContainsPoint( this.Bullets[b].Position ))
             {
                 toDestroy.push(i);
                 Statistics.AsteroidKilled();
+                collided = true;
             }
         }
+        
+        if (collided)
+            toDestroy.push(this.Bullets[b]);
     }
     
     if (toDestroy.length == 0)
@@ -227,7 +243,7 @@ World.prototype.CheckCollisions = function()
     
     toDestroy = toDestroy.unique();
     
-    for(var i = toDestroy.length - 1; i >= 0; --i)
+    for(var i = 0; i < toDestroy.length; ++i)
         this.DestroyGameObject(toDestroy[i]);
 }
 
@@ -235,5 +251,6 @@ World.prototype.CheckCollisions = function()
 
 World.Init = function()
 {
-    g_World = new World();
+    var game = new Game();
+    g_World = new World(game);
 }

@@ -15,7 +15,7 @@ Statistics.Refresh = function()
         statistic.innerHTML = Statistics.Score;
     }
     
-    setTimeout("Statistics.Refresh()", 1000);
+    Help.CallIn(1000, Statistics, "Refresh");
 }
 
-setTimeout("Statistics.Refresh()", 1000);
+Help.CallIn(1000, Statistics, "Refresh");

@@ -31,7 +31,7 @@ Debug.RefreshDiagnostics = function()
     }
 
     
-    setTimeout("Debug.RefreshDiagnostics()", 500);
+    Help.CallIn(500, Debug, "RefreshDiagnostics");
 }
 
-setTimeout("Debug.RefreshDiagnostics()", 500);
+Help.CallIn(500, Debug, "RefreshDiagnostics");
