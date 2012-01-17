@@ -1,6 +1,7 @@
 ﻿function Game()
 {
     this.Round = 0;
+    this.ToSpawn = 0;
 }
 
 Game.prototype.Start = function()
@@ -20,24 +21,40 @@ Game.prototype.Update = function()
     this.BeginRound();
 }
 
-Game.prototype.BeginRound = function()
+Game.prototype.PlaceAsteroid = function()
 {
     var bounds = g_World.GetBounds();
-    var asteroidCount = Data.AsteroidsPerRound * this.Round;
-    for (var i = 0; i < asteroidCount; ++i)
+    var choice = Math.round( Math.random() );
+    var xMul = choice * Math.random();
+    var yMul = (1 - choice) * Math.random();
+    
+    var side = this.ToSpawn % 2;//Math.round( Math.random() );
+    var point = new Vector( bounds[side] );
+    var delta = new Vector( bounds[1 - side] ).Subtract( point.Multiply(side) );
+    
+    var delPos = new Vector( xMul * delta[0], yMul * delta[1] );
+    var pos = point.Add(delPos);
+    
+    var created = g_World.CreateAsteroidWithoutSpawning();
+    created.Position = pos;
+    
+    var toCenter = Vector.ZERO.Subtract(pos);
+    toCenter.Normalise();
+    toCenter = toCenter.Multiply( Math.abs(g_World.CreateRandomAsteroidSpeed()) ).Rotate( 2 * (Math.random() - 0.5) * Math.PI * 0.25 );
+    created.Velocity = toCenter;
+    
+    if (!g_World.GameObjectCollides(created))
     {
-        var choice = Math.round( Math.random() );
-        var xMul = choice * Math.random();
-        var yMul = (1 - choice) * Math.random();
-        
-        var side = Math.round( Math.random() );
-        var point = new Vector( bounds[side] );
-        var delta = new Vector( bounds[1 - side] ).Subtract( point.Multiply(-side) );
-        
-        var delPos = new Vector( xMul * delta[0], yMul * delta[1] );
-        var pos = point.Add(delPos);
-        
-        var created = g_World.CreateAsteroid();
-        created.Position = pos;
+        this.ToSpawn--;
+        g_World.SpawnGameObject(created);
     }
+    
+    if (this.ToSpawn > 0)
+        Help.CallIn(2000, this, "PlaceAsteroid");
+}
+
+Game.prototype.BeginRound = function()
+{
+    this.ToSpawn = Data.AsteroidsPerRound * this.Round;
+    Help.CallIn(1000, this, "PlaceAsteroid");
 }

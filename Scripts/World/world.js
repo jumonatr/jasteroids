@@ -17,7 +17,7 @@ function World(game)
     this.Culled = 0;
     this.FPS = 0;
 
-    //Private Initialisation
+    //Private Initialisation	
     //THIS SHIT BE GLOBAL!
     gl = WebGLUtils.setupWebGL(canvas, {premultipliedAlpha: false});    
     if (!gl)
@@ -128,17 +128,31 @@ function World(game)
     game.Start();
 }
 
-World.prototype.CreateAsteroid = function()
+World.prototype.CreateRandomAsteroidSpeed = function()
+{
+    var maxSpeed = Data.MaxAsteroidSpeed;
+    var minSpeed = Data.MinAsteroidSpeed;
+    var randomSign = 2 * Math.round(Math.random()) - 1;
+    var randSpeed = maxSpeed * Math.random() + minSpeed;
+    return randomSign * randSpeed;
+}
+
+World.prototype.CreateAsteroidWithoutSpawning = function()
 {
     var created = CreateAsteroid(Data.MaxAsteroidSize, Data.MinAsteroidSize);
     created.AngularVelocity = (Math.random() - 0.5) * 0.4 * Math.PI;
-    
-    var maxSpeed = Data.MaxAsteroidSpeed;
-    created.Velocity = new Vector(maxSpeed * (Math.random() - 0.5), maxSpeed * (Math.random() - 0.5));
+
+    created.Velocity = new Vector(this.CreateRandomAsteroidSpeed(), this.CreateRandomAsteroidSpeed());
 
     //var created = new LineDebris([0, 0, 0, 100, 100, 0], 3);
     //var created = new Ship();
-    this.SpawnGameObject(created);
+    return created;
+}
+
+World.prototype.CreateAsteroid = function()
+{
+    var created = this.CreateAsteroidWithoutSpawning();
+    this.SpawnGameObject( created );
     return created;
 }
 
@@ -190,6 +204,23 @@ World.prototype.DestroyGameObject = function(element)
         for(var j = 0; j < split.length; ++j)
             this.SpawnGameObject(split[j]);
     }
+}
+
+World.prototype.GameObjectCollides = function(go)
+{
+    if (!go.CollidesWith)
+        return false;
+        
+    for(var i = this.GameObjects.length - 1; i >= 0; --i)
+    {
+        if (!this.GameObjects[i].CollidesWith)
+            continue;
+         
+        if (this.GameObjects[i].CollidesWith(go))
+                return true;
+    }
+    
+    return false;
 }
         
 World.prototype.CheckCollisions = function()

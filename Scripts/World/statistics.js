@@ -15,6 +15,12 @@ Statistics.Refresh = function()
         statistic.innerHTML = Statistics.Score;
     }
     
+    statistic = document.getElementById("live_asteroids");
+    if (statistic)
+    {
+        statistic.innerHTML = g_World.Asteroids.length;
+    }
+    
     Help.CallIn(1000, Statistics, "Refresh");
 }
 

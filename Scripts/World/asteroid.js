@@ -86,10 +86,10 @@ Asteroid.prototype.Break = function()
     mat4.multiplyVec3(transform, centerTwo);
     
     var toTwo = new Vector(centerOne).Subtract(centerTwo);
-    toTwo = toTwo.Normalise().Multiply(10);
+    toTwo = toTwo.Normalise().Multiply( this.Velocity.GetLength() );
     
     var toOne = toTwo.Multiply(-1);
-    toOne = toOne.Normalise().Multiply(10);
+    toOne = toOne.Normalise().Multiply( this.Velocity.GetLength() );
     
     children[0].Velocity = toTwo;
     children[1].Velocity = toOne;

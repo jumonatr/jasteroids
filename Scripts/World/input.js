@@ -104,6 +104,16 @@ Input.Keys =
         SINGLE_QUOTE : 222
     };
 
+Input.KeysToKill =
+    [
+        Input.Keys.LEFT_ARROW,
+        Input.Keys.UP_ARROW,
+        Input.Keys.RIGHT_ARROW,
+        Input.Keys.DOWN_ARROW,
+        Input.Keys.CTRL
+    ];
+
+
 Input.IsKeyPressed = function(key)
 {
     return Input.KeyState[key] || false;
@@ -111,10 +121,16 @@ Input.IsKeyPressed = function(key)
 
 document.onkeydown = function(evt)
 {
+    if (Input.KeysToKill.contains(evt.keyCode))
+        evt.preventDefault();
+        
     Input.KeyState[evt.keyCode] = true;
 }
 
 document.onkeyup = function(evt)
 {
+    if (Input.KeysToKill.contains(evt.keyCode))
+        evt.preventDefault();
+
     Input.KeyState[evt.keyCode] = false;
 }

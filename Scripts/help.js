@@ -39,6 +39,18 @@ Array.prototype.unique = function()
     return r;
 }
 
+Array.prototype.contains = function(item)
+{
+    for(i = this.length - 1; i >= 0; --i)
+    {
+        if (this[i] == item)
+            return true;
+    }
+    
+    return false;
+}
+
+
 Array.prototype.remove = function(item)
 {
     var len = this.length;

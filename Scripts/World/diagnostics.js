@@ -2,24 +2,27 @@
 Debug = {}
 Debug.RefreshDiagnostics = function()
 {
-    var statistic = document.getElementById("asteroidCount");
+    var statistic = document.getElementById("gameobject_count");
     if (statistic)
     {
-        statistic.innerHTML = g_World.GameObjects.length;
+        statistic.innerHTML = g_World == null ? "No World" : g_World.GameObjects.length;
     }
     
     statistic = document.getElementById("culled");
     if (statistic)
     {
-        statistic.innerHTML = g_World.Culled;
+        statistic.innerHTML = g_World == null ? "No World" : g_World.Culled;
     }
     
     statistic = document.getElementById("verts");
     if (statistic)
     {
         var count = 0;
-        for(var i = 0; i < g_World.GameObjects.length; ++i)
-            count += g_World.GameObjects[i].LineBuffer ? g_World.GameObjects[i].LineBuffer.NumItems : 0;
+        if (g_World != null)
+        {
+            for(var i = 0; i < g_World.GameObjects.length; ++i)
+                count += g_World.GameObjects[i].Shape ? g_World.GameObjects[i].Shape.NumItems : 0;
+        }
             
         statistic.innerHTML = count;
     }
@@ -27,7 +30,7 @@ Debug.RefreshDiagnostics = function()
     statistic = document.getElementById("fps");
     if (statistic)
     {
-        statistic.innerHTML = g_World.FPS;
+        statistic.innerHTML = g_World == null ? "No World" : g_World.FPS.toFixed(1);
     }
 
     

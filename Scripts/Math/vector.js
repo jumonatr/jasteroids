@@ -22,12 +22,12 @@ function Vector(a, b, c)
     this.length = 3;
 }
 
-Vector.UNIT_X = [1, 0, 0];
-Vector.UNIT_Y = [0, 1, 0];
-Vector.UNIT_Z = [0, 0, 1];
-Vector.ZERO = [0, 0, 0];
-
 Vector.prototype = new Array;
+
+Vector.UNIT_X = new Vector([1, 0, 0]);
+Vector.UNIT_Y = new Vector([0, 1, 0]);
+Vector.UNIT_Z = new Vector([0, 0, 1]);
+Vector.ZERO = new Vector([0, 0, 0]);
 
 Vector.prototype.__defineGetter__("X", function() { return this[0]; });
 Vector.prototype.__defineSetter__("X", function(value)

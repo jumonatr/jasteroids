@@ -2,9 +2,10 @@
 
 Data.MaxAsteroidDivisions = 20;
 Data.MinAsteroidDivisions = 6;
-Data.MaxAsteroidSize = 100;
-Data.MinAsteroidSize = 50;
-Data.MaxAsteroidSpeed = 100;
+Data.MaxAsteroidSize = 60;
+Data.MinAsteroidSize = 30;
+Data.MaxAsteroidSpeed = 70;
+Data.MinAsteroidSpeed = 30;
 
 Data.MaxDebrisLifeSpan = 10;
 
