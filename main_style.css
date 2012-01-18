@@ -27,6 +27,7 @@ html, body
     position:absolute;
     left: 0;
     bottom: 0;
+    padding: 30px;
 }
 
 #nowebgl
@@ -35,6 +36,17 @@ html, body
     position: absolute;
     left: 0;
     bottom: 0;
+    padding: 30px;
+}
+
+#controls
+{
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 100px;
+    width: 150px;
+    padding: 30px;
 }
 
 #statistics
@@ -44,4 +56,5 @@ html, body
     position:absolute;
     right: 0;
     bottom: 0;
+    padding: 30px;
 }

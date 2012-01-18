@@ -13,4 +13,5 @@
     left: 0;
     top: 30px;
     width: 100%;
+    z-index: 1;
 }

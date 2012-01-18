@@ -61,6 +61,10 @@
 	<body onload="World.Init()" onresize="g_World.Resized()">
 		<canvas id="world" onclick="g_World.Clicked(this, event)">
 		</canvas>
+		<img id="controls" src="Content/keys.png" 
+		    alt="Controls: Arrow Keys and Right Control Key"
+		    title="Controls: Arrow Keys and Right Control Key"></img>
+		    
 		<div id="diagnostics">
 		    <div>GameObjects: <span id="gameobject_count">-</span></div>
 		    <div>Culled: <span id="culled">-</span></div>
