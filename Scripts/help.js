@@ -1,3 +1,10 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
+//dude
 ﻿Help = {};
 
 Help.MAX_VALUE = 999999999;
@@ -46,7 +53,7 @@ Array.prototype.contains = function(item)
         if (this[i] == item)
             return true;
     }
-    
+
     return false;
 }
 
@@ -58,11 +65,11 @@ Array.prototype.remove = function(item)
     {
         if (this[i] != item)
             continue;
-        
+
         this.splice(i, 1);
         return true;
     }
-    
+
     return false;
 }
 
@@ -104,7 +111,7 @@ Help.ConvertVertexBufferToVectorArray = function(verticeBuffer, verticeSize)
         var vector = new Vector(verticeBuffer.slice(index, end));
         vectorBuffer.push(vector);
     }
-    
+
     return vectorBuffer;
 }
 
@@ -117,7 +124,7 @@ Help.ConvertVectorArrayToVertexBuffer = function(vecArr)
         buffer.push(vecArr[i][1]);
         buffer.push(vecArr[i][2]);
     }
-    
+
     return buffer;
 }
 
@@ -130,17 +137,17 @@ Help.GetBufferBoundingRadius = function(vectors, vectorSize)
     {
         var vector = new Vector(vectors.slice(vectorSize * i, vectorSize * (i + 1)));
         var squareLen = vector.GetSquareLength();
-        
+
         if (maxLen < squareLen)
         {
             maxLen = squareLen;
             maxVector = vector;
         }
     }
-    
+
     if (!maxVector)
         throw new Error("Couldn't find a max vector with " + vectors + " and size " + vectorSize);
-        
+
     return Math.sqrt(maxLen);
 }
 
@@ -192,31 +199,31 @@ Help.Center = function(vectorBuffer, vectorSize)
 {
     if (vectorBuffer.length == 0)
         throw new Error("Can't find center of 0 vectors");
-        
+
     if (vectorSize == 0)
         throw new Error("Can't have vectors of 0 size");
-    
+
     if (vectorBuffer.length % vectorSize != 0)
         throw new Error("Bad Element Count Provided " + String(vectorSize));
 
     var center = [];
     var elementCount = vectorBuffer.length / vectorSize;
-    
+
     for(var j = 0; j < vectorSize; ++j)
         center.push( vectorBuffer[j] );
-    
+
     for(var i = 1; i < elementCount; ++i)
     {
         for(var j = 0; j < vectorSize; ++j)
             center[j] += vectorBuffer[i * vectorSize + j];
     }
-    
+
     for(var j = 0; j < vectorSize; ++j)
         center[j] /= elementCount;
-    
+
     return center;
 }
-    
+
 //UNIT TESTS
 
 function Test_Center()
@@ -226,9 +233,9 @@ function Test_Center()
         0, 1, 0,
         0, -1, 0
     ]
-    
+
     SimpleTest.Equals([0, 0, 0], Help.Center(vectorsToCenter, 3));
-    
+
     vectorsToCenter =
     [
         0, 1, 0,
@@ -237,9 +244,9 @@ function Test_Center()
         -1, 0, 0,
         0, 0, 1
     ]
-    
+
     SimpleTest.Equals([0, 0, 0.2], Help.Center(vectorsToCenter, 3));
-    
+
     vectorsToCenter =
     [
         0, 1, 0,
@@ -279,30 +286,30 @@ function Test_CircularLoop()
         1, 2,
         2, 3
     ]
-    
+
     var array = [0, 1, 2, 3];
-    
+
     var func = function(i, j)
     {
         SimpleTest.Equals( i, desired[2 * iter] );
         SimpleTest.Equals( j, desired[2 * iter + 1] );
         iter++;
     }
-    
+
     //Help.CirclularLoop = function(array, func)
     Help.CircularLoop(array, func);
     SimpleTest.Equals( 4, iter);
-    
+
     iter = 0;
     var func = function(i, j)
     {
         iter++;
         return true; //break immediately
     }
-    
+
     //Help.CirclularLoop = function(array, func)
     Help.CircularLoop(array, func);
-    
+
     SimpleTest.Equals( 1, iter);
 }
 
@@ -310,25 +317,25 @@ function Test_HelpAddRange()
 {
     var one = [0, 1];
     var two = [2, 3];
-    
+
     Help.AddRange(one, two);
     SimpleTest.Equals( [0, 1, 2, 3], one );
-    
+
     one = [];
     two = [];
-    
+
     Help.AddRange(one, two);
     SimpleTest.Equals( [], one );
 
     one = [1, 2];
     two = [];
-    
+
     Help.AddRange(one, two);
     SimpleTest.Equals( [1, 2], one );
 
     one = [];
     two = [1, 2];
-    
+
     Help.AddRange(one, two);
     SimpleTest.Equals( [1, 2], one );
 }
@@ -348,7 +355,7 @@ function Test_IsCounterClockwise()
         var received = Help.IsCounterClockWise(vectorList);
         SimpleTest.Equals( value, received );
     }
-    
+
     var shape =
     [
         0, 0,
@@ -356,9 +363,9 @@ function Test_IsCounterClockwise()
         1, 1,
         0, 1
     ];
-    
+
     TestCounter(shape, true);
-    
+
     shape =
     [
         0, 0,
@@ -366,7 +373,7 @@ function Test_IsCounterClockwise()
         1, 1,
         1, 0
     ];
-    
+
     TestCounter(shape, false);
 }
 
@@ -388,6 +395,6 @@ function Test_ArrayRemove()
     SimpleTest.Equals([2], ar);
     ar.remove(2);
     SimpleTest.Equals([], ar);
-    
+
     SimpleTest.Equals(false, ar.remove(2));
 }

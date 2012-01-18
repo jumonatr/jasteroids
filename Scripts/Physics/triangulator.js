@@ -1,13 +1,19 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿//javascript port of code found here http://www.unifycommunity.com/wiki/index.php?title=Triangulator
 
 function Triangulate(points)
 {
     var indices = [];
-    
+
     var n = points.length;
     if (n < 3)
         return indices;
-    
+
     var V = [];
     V.length = n;
 
@@ -21,14 +27,14 @@ function Triangulate(points)
         for (var v = 0; v < n; v++)
             V[v] = (n - 1) - v;
     }
-    
+
     var nv = n;
     var count = 2 * nv;
     for (var m = 0, v = nv - 1; nv > 2; )
     {
         if ((count--) <= 0)
             return indices;
-        
+
         var u = v;
         if (nv <= u)
             u = 0;
@@ -38,7 +44,7 @@ function Triangulate(points)
         var w = v + 1;
         if (nv <= w)
             w = 0;
-        
+
         if (Snip(u, v, w, nv, V))
         {
             var a, b, c, s, t;
@@ -55,11 +61,11 @@ function Triangulate(points)
             count = 2 * nv;
         }
     }
-    
+
     indices.reverse();
-    
+
     return indices;
-    
+
     function Area()
     {
         var n = points.length;
@@ -72,7 +78,7 @@ function Triangulate(points)
         }
         return A * 0.5;
     }
-    
+
     function Snip(u, v, w, n, V)
     {
         var A = points[V[u]];
@@ -90,23 +96,23 @@ function Triangulate(points)
         }
         return true;
     }
-    
-    function InsideTriangle( A, B, C, P) 
+
+    function InsideTriangle( A, B, C, P)
     {
         var ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
         var cCROSSap, bCROSScp, aCROSSbp;
-        
+
         ax = C.x - B.x; ay = C.y - B.y;
         bx = A.x - C.x; by = A.y - C.y;
         cx = B.x - A.x; cy = B.y - A.y;
         apx = P.x - A.x; apy = P.y - A.y;
         bpx = P.x - B.x; bpy = P.y - B.y;
         cpx = P.x - C.x; cpy = P.y - C.y;
-        
+
         aCROSSbp = ax * bpy - ay * bpx;
         cCROSSap = cx * apy - cy * apx;
         bCROSScp = bx * cpy - by * cpx;
-        
+
         return ((aCROSSbp >= 0.0) && (bCROSScp >= 0.0) && (cCROSSap >= 0.0));
     }
 }
@@ -119,7 +125,7 @@ function TriangulateAndCreate(points, verticeSize)
 
     var indices = Triangulate(points);
     var triangleCount = indices.length / 3;
-    
+
     var triangles = [];
     for(var i = 0; i < triangleCount; ++i)
     {
@@ -129,10 +135,10 @@ function TriangulateAndCreate(points, verticeSize)
         {
             triangle.push( points[triangleIndices[j]] );
         }
-        
+
         triangles.push(triangle);
     }
-    
+
     return triangles;
 }
 
@@ -146,31 +152,31 @@ function Test_Triangulator()
         var vectors = Help.ConvertVertexBufferToVectorArray(shape, 2);
         var indices = Triangulate(vectors);
         return {
-            Vectors: vectors, 
+            Vectors: vectors,
             Indices: indices,
             TriangleCount: indices.length / 3
             };
     }
-    
+
     var shape = [
         0,0,
         1,0,
         1,1,
         0,1
     ];
-    
+
     var result = TriangulateShape(shape);
     SimpleTest.Equals(2, result.TriangleCount);
-    
+
     shape = [
         1, 0,
         1, 1,
         -1, 0
     ];
-    
+
     result = TriangulateShape(shape);
     SimpleTest.Equals(1, result.TriangleCount);
-    
+
     shape = [
         0, 0,
         1, 1,
@@ -179,7 +185,7 @@ function Test_Triangulator()
         2, 0,
         1, 0
     ];
-    
+
     result = TriangulateShape(shape);
     SimpleTest.Equals(4, result.TriangleCount);
 }
@@ -190,22 +196,22 @@ function Test_CreateTriangles()
     function CheckTriangles(shape, desired)
     {
         var triangles = TriangulateAndCreate(shape, 2);
-        
+
         for(var i = 0; i < desired.length; ++i)
         {
             desired[i] = Help.ConvertVertexBufferToVectorArray(desired[i], 2);
         }
-        
+
         SimpleTest.Equals(desired, triangles);
     }
-    
+
     var shape = [
         0,0,
         1,0,
         1,1,
         0,1
     ];
-    
+
     var desired = [
         [
             0,0,
@@ -218,6 +224,6 @@ function Test_CreateTriangles()
             0,0
         ]
     ];
-    
-    CheckTriangles(shape, desired); 
+
+    CheckTriangles(shape, desired);
 }

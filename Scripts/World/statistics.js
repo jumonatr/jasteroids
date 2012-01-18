@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿Statistics = {};
 
 Statistics.Score = 0;
@@ -14,13 +20,13 @@ Statistics.Refresh = function()
     {
         statistic.innerHTML = Statistics.Score;
     }
-    
+
     statistic = document.getElementById("live_asteroids");
     if (statistic)
     {
         statistic.innerHTML = g_World.Asteroids.length;
     }
-    
+
     Help.CallIn(1000, Statistics, "Refresh");
 }
 

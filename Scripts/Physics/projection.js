@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿function Projection(min, max)
 {
     this.Min = min;
@@ -15,14 +21,14 @@ Projection.ProjectShape = function(axis, vectors)
     var min = Help.MAX_VALUE;
     var max = Help.MIN_VALUE;
     var normedAxis = (new Vector(axis)).GetNormalised();
-    
+
     for(var i = 0; i < vectors.length; ++i)
     {
         var dot = vectors[i].Dot(normedAxis);
         min = Math.min(dot, min);
         max = Math.max(dot, max);
     }
-    
+
     return new Projection(min, max);
 }
 
@@ -36,9 +42,9 @@ function Test_ProjectionProjectShape()
         new Vector([-10, 4]),
         new Vector([4, -7])
     ];
-    
+
     var projection = Projection.ProjectShape(axis, vectors);
-    
+
     SimpleTest.Equals(-10, projection.Min);
     SimpleTest.Equals(4, projection.Max);
 }
@@ -51,14 +57,14 @@ function Test_ProjectionOverlap()
         new Vector([-10, 4]),
         new Vector([4, -7])
     ];
-    
+
     //test with same volume
-    var projectionOne = Projection.ProjectShape(axis, vectorsOne);    
+    var projectionOne = Projection.ProjectShape(axis, vectorsOne);
     var projectionTwo = Projection.ProjectShape(axis, vectorsOne);
-    
+
     SimpleTest.Equals(true, projectionOne.Overlaps(projectionTwo));
     SimpleTest.Equals(true, projectionTwo.Overlaps(projectionOne));
-    
+
     //test equal edges
     var vectorsTwo = [
         new Vector([6, 30]),
@@ -92,10 +98,10 @@ function Test_ProjectionOverlap()
         new Vector([1, 2.1]),
         new Vector([0.5, 3])
     ];
-    
-    projectionOne = Projection.ProjectShape(axis, vectorsOne);    
+
+    projectionOne = Projection.ProjectShape(axis, vectorsOne);
     projectionTwo = Projection.ProjectShape(axis, vectorsTwo);
-    
+
     SimpleTest.Equals(false, projectionOne.Overlaps(projectionTwo));
     SimpleTest.Equals(false, projectionTwo.Overlaps(projectionOne));
 }

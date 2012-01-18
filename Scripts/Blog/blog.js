@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿
 function FormatPage()
 {

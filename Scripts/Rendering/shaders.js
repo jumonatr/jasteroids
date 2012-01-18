@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿function CreateSimpleShader()
 {
     return _CreateShader("simpleVertex", "simpleFragment");
@@ -47,15 +53,15 @@ function _CreateProgram(vs_source_id, fs_source_id)
 {
     var vs = GetShader(vs_source_id);
     var fs = GetShader(fs_source_id);
-    
+
     var program = gl.createProgram();
     gl.attachShader(program , vs);
     gl.attachShader(program , fs);
     gl.linkProgram(program);
-    
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) 
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
     	console.log(gl.getProgramInfoLog(program));
-    	
+
    	return program;
 }
 
@@ -63,14 +69,14 @@ function _CreateProgram(vs_source_id, fs_source_id)
 function _CreateShader(vs_source_id, fs_source_id)
 {
     var program = _CreateProgram(vs_source_id, fs_source_id);
-    	
+
     gl.useProgram(program);
-    	
+
     program.UniformModelView = gl.getUniformLocation(program, "modelView");
     program.UniformProjection = gl.getUniformLocation(program, "projection");
     program.UniformColor = gl.getUniformLocation(program, "color");
     program.AttribPos = gl.getAttribLocation(program, "pos");
-    
+
 // Helper methods
     program.Enable = function()
     {
@@ -81,12 +87,12 @@ function _CreateShader(vs_source_id, fs_source_id)
     {
         gl.uniformMatrix4fv(this.UniformModelView , false, mat);
     }
-    
+
     program.SetProjection = function(mat)
     {
         gl.uniformMatrix4fv(this.UniformProjection, false, mat);
     }
-    
+
     program.SetColor = function(color)
     {
         gl.uniform4fv(this.UniformColor, color);
@@ -100,8 +106,8 @@ function _CreateShader(vs_source_id, fs_source_id)
     var Projection = mat4.create();
     mat4.ortho(-1, 1, -1, 1, -1, 1, Projection);
     program.SetProjection(Projection);
-    
+
     program.SetColor([1.0, 1.0, 0.0, 1.0]);
-    
+
     return program;
 }

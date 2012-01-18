@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿
 function CreateAsteroid(max_size, min_size)
 {
@@ -11,18 +17,18 @@ function CreateAsteroid(max_size, min_size)
 Asteroid.prototype = new GameObject();
 
 function Asteroid(lineBuffer, position, angle)
-{    
+{
     //init
     if (position)
         this.Position = position;
-        
+
     if (angle)
         this.Angle = angle;
 
     this.Shape = lineBuffer;
     this.Radius = this.Shape.BoundingRadius;
     this.CreationTime = (new Date()).getTime();
-    this.Color = Help.Colors.WHITE;       
+    this.Color = Help.Colors.WHITE;
 }
 
 Asteroid.prototype.IsVisible = function(lowerLeft, topRight)
@@ -40,7 +46,7 @@ Asteroid.prototype.Draw = function(program)
 {
     var transform = this.GetTransform();
 
-    program.SetWorld(transform);        
+    program.SetWorld(transform);
     this.Shape.Draw(program, this.Color);
 }
 
@@ -75,22 +81,22 @@ Asteroid.prototype.Break = function()
         console.error("Failed to split shape in asteroid, falling back to split into lines: " + e);
         return this.Shape.SplitIntoLines(this.Position, this.Velocity, this.Angle, this.AngularVelocity);
     }
-        
+
     var children = [ new Asteroid(childShapes[0], this.Position, this.Angle), new Asteroid(childShapes[1], this.Position, this.Angle) ];
     var transform = this.GetTransform();
-    
+
     var centerOne = Help.Center(childShapes[0].Vertices, childShapes[0].VertexSize);
     mat4.multiplyVec3(transform, centerOne);
-    
+
     var centerTwo = Help.Center(childShapes[1].Vertices, childShapes[1].VertexSize);
     mat4.multiplyVec3(transform, centerTwo);
-    
+
     var toTwo = new Vector(centerOne).Subtract(centerTwo);
     toTwo = toTwo.Normalise().Multiply( this.Velocity.GetLength() );
-    
+
     var toOne = toTwo.Multiply(-1);
     toOne = toOne.Normalise().Multiply( this.Velocity.GetLength() );
-    
+
     children[0].Velocity = toTwo;
     children[1].Velocity = toOne;
 
@@ -101,15 +107,15 @@ function CreateAsteroidVerts(max_amount, min_amount, max_radius, min_radius)
 {
     if (min_amount < 3)
         throw "Can't have less than 3 vertices";
-        
+
     if (min_radius < 0.0000001)
         throw "Can't have mini asteroide";
-    
+
     max_amount += 1;
     var vertCount = Math.floor( Math.random() * (max_amount - min_amount) + min_amount);
-    
+
     var deltaAngle = -2.0 * Math.PI / vertCount;
-    
+
     var rotation = mat4.create();
     mat4.identity(rotation);
 
@@ -117,18 +123,18 @@ function CreateAsteroidVerts(max_amount, min_amount, max_radius, min_radius)
     for( var i = 0; i < vertCount; ++i)
     {
         var length = Math.random() * (max_radius - min_radius) + min_radius;
-        
+
         var vertice = [length, 0, 0];
         mat4.multiplyVec3(rotation, vertice);
-        
+
         vertices.push(vertice[0]);
         vertices.push(vertice[1]);
         vertices.push(vertice[2]);
-        
+
         //add angle to rot matrix to turn vertice for next iteration
         mat4.rotate(rotation, deltaAngle, Vector.UNIT_Z);
     }
-    
+
     return vertices;
 }
 

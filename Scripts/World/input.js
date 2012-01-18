@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿Input = {}
 
 Input.KeyState = {};
@@ -123,7 +129,7 @@ document.onkeydown = function(evt)
 {
     if (Input.KeysToKill.contains(evt.keyCode))
         evt.preventDefault();
-        
+
     Input.KeyState[evt.keyCode] = true;
 }
 

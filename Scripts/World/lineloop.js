@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿//Line Buffer class used to keep vertices and draw them as a line_loop
 
 function LineLoop(verticeSize, vertices)
@@ -8,10 +14,10 @@ function LineLoop(verticeSize, vertices)
     this.Vertices = vertices;
     this.BoundingRadius = Help.GetBufferBoundingRadius(vertices, verticeSize);
     this.ConvexePolys = (new EarclipDecomposer()).ConvexPartitionFromBuffer(vertices, verticeSize);
-    
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexBuffer);					
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    
+
     //create buffers for rendering the physics primitives
     var convexeBuffs = [];
     if (Debug.RenderPhysics)
@@ -21,28 +27,28 @@ function LineLoop(verticeSize, vertices)
             var len = this.ConvexePolys[i].length;
             var bufferData = Help.ConvertVectorArrayToVertexBuffer( this.ConvexePolys[i] );
             var buffer = gl.createBuffer();
-            
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);					
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bufferData), gl.STATIC_DRAW);
-            
+
             convexeBuffs.push( { count : len, buff : buffer });
         }
     }
-    
+
     this.Draw = function(program, color)
     {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexBuffer);
         gl.enableVertexAttribArray(program.AttribPos);
         gl.vertexAttribPointer(program.AttribPos, verticeSize, gl.FLOAT, false, 0, 0);
         program.SetColor(color);
-        
+
         gl.drawArrays(gl.LINE_LOOP, 0, this.NumItems);
-        
+
         if (Debug.RenderPoints)
         {
             gl.drawArrays(gl.POINTS, 0, this.NumItems);
         }
-        
+
         if (Debug.RenderPhysics)
         {
             for(var i = 0; i < convexeBuffs.length; ++i)
@@ -51,32 +57,32 @@ function LineLoop(verticeSize, vertices)
                 gl.enableVertexAttribArray(program.AttribPos);
                 gl.vertexAttribPointer(program.AttribPos, 3, gl.FLOAT, false, 0, 0);
                 program.SetColor([1, 0, 0, 1]);
-                
+
                 gl.drawArrays(gl.LINE_LOOP, 0, convexeBuffs[i].count);
             }
         }
     }
-    
+
     function GetVert(i)
     {
         var start = i * verticeSize;
         var end = start + 3;
         return vertices.slice(start, end);
     }
-    
+
     this.ContainsPoint = function(point, transform)
     {
         var hit = false;
         var nvert = this.NumItems;
-        
+
         for (var i = 0, j = nvert - 1; i < nvert; j = i++)
     	{
     		var jVert = GetVert(j);
     		mat4.multiplyVec3(transform, jVert);
-    		
+
     		var iVert = GetVert(i);
     		mat4.multiplyVec3(transform, iVert);
-    		
+
     		if ( ((iVert[1] > point[1]) != (jVert[1] > point[1]))
     				&&
     			(point[0] < (jVert[0] - iVert[0]) * (point[1] - iVert[1]) /
@@ -85,17 +91,17 @@ function LineLoop(verticeSize, vertices)
     			hit = !hit;
     		}
     	}
-    	
+
     	return hit;
     }
-    
+
     this.CrudeCollidesWith = function(position, other, positionOther)
     {
         return Physics.CirclesCollide(position, this.BoundingRadius, positionOther, other.BoundingRadius);
     }
-        
+
     this.CollidesWith = function(transform, other, transformOther)
-    {            
+    {
         for(var i = 0; i < this.ConvexePolys.length; ++i)
         {
             for(var j = 0; j < other.ConvexePolys.length; ++j)
@@ -107,20 +113,20 @@ function LineLoop(verticeSize, vertices)
                     return true;
             }
         }
-        
+
         return false;
     }
-    
+
     this.SplitInTwo = function()
     {
         if (vertices.length <= 5 * verticeSize )
             return null;
 
         var halfIdx = Math.floor(this.NumItems / 2.0);
-         
+
         //duplicate the array to modify it later on
         var second = vertices.slice(0);
-        
+
         //randomize order
         for (var i = 0; i < Math.random() * this.NumItems; ++i)
         {
@@ -129,29 +135,29 @@ function LineLoop(verticeSize, vertices)
                 second.push( second.shift(), second.shift(), second.shift() );
             }
         }
-        
+
         var first = second.slice(0, verticeSize * (halfIdx + 1));
-        
+
         //remove all but the first and last vertices of the first split from the second
         second.splice(verticeSize, first.length - 2 * verticeSize);
-        
-        //  
+
+        //
         //  4 + 1
-        //  3   2  
+        //  3   2
         //
         var toAddFirst = Help.Center( [ first[0], first[1], first[2], first[first.length - 3], first[first.length - 2], first[first.length - 1] ], verticeSize);
         first.push(toAddFirst[0], toAddFirst[1], toAddFirst[2]);
-        
-        //  
+
+        //
         //  3   4
-        //  2 + 1  
+        //  2 + 1
         //
         var toAddSecond = Help.Center( second.slice(0, 2 * verticeSize), verticeSize);
         second.splice(verticeSize, 0, toAddSecond[0], toAddSecond[1], toAddSecond[2]);
-        
+
         return [ new LineLoop(verticeSize, first), new LineLoop(verticeSize, second) ];
     }
-    
+
     this.SplitIntoLines = function(position, velocity, angle, angularVelocity)
     {
         function CreateLine(verts, vertSize)
@@ -159,12 +165,12 @@ function LineLoop(verticeSize, vertices)
             var creation = new LineDebris(verts, vertSize);
             creation.Position = new Vector(position);
             creation.Velocity = velocity.Multiply(Math.random() * 2);
-            
+
             creation.Angle = angle;
             creation.AngularVelocity = angularVelocity * Math.random() * 2;
             return creation;
         }
-    
+
         var lines = [];
         //function LineDebris(vertices, verticeSize)
         var verts = this.Vertices;
@@ -175,11 +181,11 @@ function LineLoop(verticeSize, vertices)
             var lineVerts = verts.slice(vertSize * i, vertSize * (i + 2));
             lines.push(CreateLine(lineVerts, vertSize));
         }
-        
+
         var endVerts = verts.slice(vertSize * (len - 1), vertSize * len);
         Help.AddRange(endVerts, verts.slice(0, vertSize));
         lines.push(CreateLine(endVerts, vertSize));
-        
+
         return lines;
     }
 }

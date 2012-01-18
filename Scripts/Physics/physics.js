@@ -1,15 +1,21 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 Physics = {}
 
 Physics.CirclesCollide = function( positionOne, radiusOne, positionTwo, radiusTwo )
 {
     positionOne = positionOne instanceof Vector ? positionOne : new Vector(positionOne);
-    
+
     var deltaPos = positionOne.Subtract(positionTwo);
     var sqrDistance = deltaPos.GetSquareLength();
-    
+
     if ( Math.pow(radiusOne + radiusTwo, 2) >= sqrDistance )
         return true;
-    
+
     return false;
 }
 
@@ -21,9 +27,9 @@ Physics.CircleInBox = function(position, radius, botLeft, topRight)
 }
 
 /** Ported to javascript by Julien Monat
-* Computes the intersection between two lines. The calculated point is approximate, 
+* Computes the intersection between two lines. The calculated point is approximate,
  * since integers are used. If you need a more precise result, use doubles
- * everywhere. 
+ * everywhere.
  * (c) 2007 Alexander Hristov. Use Freely (LGPL license). http://www.ahristov.com
  *
 * @param x1 Point 1 of Line 1
@@ -37,15 +43,15 @@ Physics.CircleInBox = function(position, radius, botLeft, topRight)
 * @return Point where the segments intersect, or null if they don't
 */
 ///########### THIS WORKS FOR LINES NOT LINE SEGMENTS
-Physics.FindLineIntersection = function(x1,y1,x2,y2,x3,y3,x4,y4) 
+Physics.FindLineIntersection = function(x1,y1,x2,y2,x3,y3,x4,y4)
 {
     var d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
     if ( Math.abs(d) < 0.1 * Help.EPSILON) //parallel lines
         return undefined;
-    
+
     var xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;
     var yi = ((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d;
-    
+
     return new Vector( [xi,yi] );
 }
 
@@ -58,7 +64,7 @@ Physics.GetAxis = function(polygon)
         var toI = polygon[j].Subtract(polygon[i]);
         axis.push(toI.Perpendicular().Normalise());
     });
-    
+
     return axis;
 }
 
@@ -71,11 +77,11 @@ Physics.ConvexeShapesCollide = function(one, two)
     {
         var projectionOne = Projection.ProjectShape(allAxis[i], one);
         var projectionTwo = Projection.ProjectShape(allAxis[i], two);
-        
+
         if (!projectionOne.Overlaps(projectionTwo) && !projectionTwo.Overlaps(projectionOne))
             return false;
     }
-    
+
     return true;
 }
 
@@ -88,22 +94,22 @@ Physics.IsConvexe = function(vectorArray)
     {
         var toI = vectorArray[i].Subtract(vectorArray[j]);
         var toIPlusOne = vectorArray[i + 1].Subtract(vectorArray[i]);
-        
+
         var currentAngle = toI.RadiansBetween(toIPlusOne);
         if (currentAngle < 0)
             currentAngle += 2 * Math.PI;
-        
+
         var isOnSmallWay = Math.abs(currentAngle) < Help.EPSILON ? smallWay : currentAngle < Math.PI;
-        
+
         if (smallWay == undefined)
             smallWay = isOnSmallWay;
-            
+
         if (smallWay == isOnSmallWay)
             continue;
-             
+
         return false;
     }
-    
+
     return true;
 }
 
@@ -117,7 +123,7 @@ Physics.TransformShape = function(triangle, transform)
         mat4.multiplyVec3(transform, vector, result);
         newTri.push(new Vector(result));
     }
-    
+
     return newTri;
 }
 
@@ -140,7 +146,7 @@ function Test_PhysicsIsConvexe()
     {
         var vectors = Help.ConvertVertexBufferToVectorArray(shape, 2);
         SimpleTest.Equals(value, Physics.IsConvexe(vectors));
-        
+
         vectors.reverse();
         SimpleTest.Equals(value, Physics.IsConvexe(vectors));
     }
@@ -151,10 +157,10 @@ function Test_PhysicsIsConvexe()
         -1, 1,
         -1, 0
     ];
-    
+
     //test square in first two quadrants
-    CheckConvexe(shape, true);    
-    
+    CheckConvexe(shape, true);
+
     shape = [
         1, 0,
         1, -1,
@@ -162,8 +168,8 @@ function Test_PhysicsIsConvexe()
         -1, 0
     ];
     //check lower quadrants
-    CheckConvexe(shape, true);  
-    
+    CheckConvexe(shape, true);
+
     shape = [
         1, 0,
         1, 1,
@@ -171,7 +177,7 @@ function Test_PhysicsIsConvexe()
     ];
     //check triangle
     CheckConvexe(shape, true);
-    
+
     shape = [
         1, 0,
         1, 1,
@@ -180,7 +186,7 @@ function Test_PhysicsIsConvexe()
     ];
     //check concave
     CheckConvexe(shape, false);
-    
+
     shape = [
         0, 0,
         1, 1,
@@ -191,7 +197,7 @@ function Test_PhysicsIsConvexe()
     ];
     //check Paralelogram
     CheckConvexe(shape, true);
-    
+
     shape =
     [
         0, 0,
@@ -209,12 +215,12 @@ function Test_PhysicsGetAxis()
     {
         var shapeVectors = Help.ConvertVertexBufferToVectorArray(shape, 2);
         var axisVectors = Help.ConvertVertexBufferToVectorArray(axis, 2);
-        
+
         var foundAxis = Physics.GetAxis(shapeVectors);
-        
+
         SimpleTest.Equals(axisVectors, foundAxis);
     }
-    
+
     var shape =
     [
         0, 0,
@@ -222,7 +228,7 @@ function Test_PhysicsGetAxis()
         1, 1,
         1, 0
     ]
-    
+
     var axis =
     [
         0, -1,
@@ -230,7 +236,7 @@ function Test_PhysicsGetAxis()
         0, 1,
         1, 0
     ]
-    
+
     TestShapeAxis(shape, axis);
 }
 
@@ -244,7 +250,7 @@ function Test_FindLineIntersection()
     }
 
     //Physics.FindLineIntersection = function(x1,y1,x2,y2,x3,y3,x4,y4)
-    
+
     var lines =
     [
         0, 0,
@@ -255,7 +261,7 @@ function Test_FindLineIntersection()
     //check X shape
     var intersection = TestIntersect(lines, true);
     SimpleTest.Equals([0.5, 0.5, 0], intersection);
-    
+
     lines =
     [
         0, 0,
@@ -263,7 +269,7 @@ function Test_FindLineIntersection()
         0, 0,
         -1, 1
     ];
-    
+
     //check touching lines
     intersection = TestIntersect(lines, true);
     SimpleTest.Equals([0, 0, 0], intersection);
@@ -275,11 +281,11 @@ function Test_FindLineIntersection()
         0, 1,
         1, 1
     ];
-    
+
     //check L shape
     intersection = TestIntersect(lines, true);
     SimpleTest.Equals([0, 1, 0], intersection);
-    
+
     lines =
     [
         0, 0,
@@ -287,7 +293,7 @@ function Test_FindLineIntersection()
         1, 0,
         1, 1
     ];
-    
+
     //check parallel
     TestIntersect(lines, false);
 }
@@ -299,7 +305,7 @@ function Test_PhysicsConvexeShapesCollide()
     {
         var vectOne = Help.ConvertVertexBufferToVectorArray(one, 2);
         var vectTwo = Help.ConvertVertexBufferToVectorArray(two, 2);
-        
+
         SimpleTest.Equals(value, Physics.ConvexeShapesCollide(vectOne, vectTwo));
     }
 
@@ -309,48 +315,48 @@ function Test_PhysicsConvexeShapesCollide()
         2, 0,
         1, 2
     ];
-    
+
     var two =
     [
         1, 0,
         3, 0,
         2, 2
     ];
-    
+
     TestIntersection(one, two, true);
-    
+
     one =
     [
         0, 0,
         2, 0,
         1, 2
     ];
-    
+
     two =
     [
         2, 0,
         4, 0,
         3, 2
     ];
-    
+
     //test touching
     TestIntersection(one, two, true);
-    
-    
+
+
     one =
     [
         0, 0,
         2, 0,
         1, 2
     ];
-    
+
     two =
     [
         3, 0,
         5, 0,
         6, 2
     ];
-    
+
     //test to right
     TestIntersection(one, two, false);
 
@@ -360,14 +366,14 @@ function Test_PhysicsConvexeShapesCollide()
         2, 0,
         1, 2
     ];
-    
+
     two =
     [
         0, 0.1,
-        1, 2.1, 
+        1, 2.1,
         0.5, 3
     ];
-    
+
     //near
     TestIntersection(one, two, false);
 }
@@ -379,47 +385,47 @@ function Test_PhysicsTransformShape()
         var vectOne = Help.ConvertVertexBufferToVectorArray(triangles, 2);
         vectOne = Physics.TransformShape(vectOne, transform);
         var vectTwo = Help.ConvertVertexBufferToVectorArray(desired, 2);
-        
+
         SimpleTest.Equals(vectTwo, vectOne);
     }
-    
+
     var tri =
     [
        0, 0,
        2, 0,
        1, 1
     ]
-    
+
     var desired =
     [
        1, 0,
        3, 0,
        2, 1
     ]
-    
+
     var trans = mat4.create();
     mat4.identity(trans);
     mat4.translate(trans, [1, 0, 0]);
-    
+
     TestTransform(tri, trans, desired);
-    
+
     tri =
     [
        0, 0,
        2, 0,
        1, 1
     ]
-    
+
     desired =
     [
        1, -1,
        3, -1,
        2, 0
     ]
-    
+
     mat4.identity(trans);
     mat4.translate(trans, [1, -1, 0]);
-    
+
     TestTransform(tri, trans, desired);
 
 }

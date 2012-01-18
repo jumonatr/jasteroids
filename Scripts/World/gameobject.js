@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿function GameObject()
 {
     this.Position = new Vector([0, 0]);
@@ -21,7 +27,7 @@ GameObject.prototype.GetTransform = function()
     mat4.identity(transform);
     mat4.translate(transform, this.Position);
     mat4.rotate(transform, this.Angle, Vector.UNIT_Z);
-    
+
     return transform;
 }
 
@@ -41,12 +47,12 @@ GameObject.prototype.StayInWorld = function(dt)
 {
     if (!this.Radius)
         return;
-    
+
     var bounds = g_World.GetBounds();
 
     if ( Physics.CircleInBox(this.Position, 1.5 * this.Radius, bounds[0], bounds[1]) )
         return;
-    
+
     if (!Physics.CircleInBox(this.Position, 1.5 * this.Radius, new Vector(bounds[0]).Multiply(2), new Vector(bounds[1]).Multiply(2)))
     {
         var xCoord = this.Position.X;
@@ -54,15 +60,15 @@ GameObject.prototype.StayInWorld = function(dt)
         var yCoord = this.Position.Y;
         this.Position.Y = yCoord.clamp(bounds[0][1] - this.Radius, bounds[1][1] + this.Radius);
     }
-            
+
     var toCenter = this.Position.Multiply(-1);
-    
+
     if (this.Position.X < bounds[0][0] || this.Position.X > bounds[1][0])
     {
         if (toCenter.X.sign() !=  this.Velocity.X.sign())
             this.Position.X *= -1;
     }
-        
+
     if (this.Position.Y < bounds[0][1] || this.Position.Y > bounds[1][1])
     {
         if (toCenter.Y.sign() !=  this.Velocity.Y.sign())

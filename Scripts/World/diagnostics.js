@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2012 Julien Monat-Rodier
+Licence in LICENCE.txt
+*/
+
+
 ﻿
 Debug = {}
 Debug.RefreshDiagnostics = function()
@@ -7,13 +13,13 @@ Debug.RefreshDiagnostics = function()
     {
         statistic.innerHTML = g_World == null ? "No World" : g_World.GameObjects.length;
     }
-    
+
     statistic = document.getElementById("culled");
     if (statistic)
     {
         statistic.innerHTML = g_World == null ? "No World" : g_World.Culled;
     }
-    
+
     statistic = document.getElementById("verts");
     if (statistic)
     {
@@ -23,17 +29,17 @@ Debug.RefreshDiagnostics = function()
             for(var i = 0; i < g_World.GameObjects.length; ++i)
                 count += g_World.GameObjects[i].Shape ? g_World.GameObjects[i].Shape.NumItems : 0;
         }
-            
+
         statistic.innerHTML = count;
     }
-    
+
     statistic = document.getElementById("fps");
     if (statistic)
     {
         statistic.innerHTML = g_World == null ? "No World" : g_World.FPS.toFixed(1);
     }
 
-    
+
     Help.CallIn(500, Debug, "RefreshDiagnostics");
 }
 
