@@ -33,8 +33,8 @@ PostProcessor.prototype.InitialiseFrameBuffer = function(width, height)
 
     this.FrameBuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.FrameBuffer);
-    this.FrameBuffer.width = width;
-    this.FrameBuffer.height = height;
+    this.FrameBuffer.width = Math.round(width * 0.5);
+    this.FrameBuffer.height = Math.round(height * 0.5);
     
     this.Texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.Texture);
