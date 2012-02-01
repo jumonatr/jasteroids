@@ -9,6 +9,11 @@ Licence in LICENCE.txt
     return _CreateShader("simpleVertex", "simpleFragment");
 }
 
+function CreatePostShader()
+{
+    return _CreateShader("postVertex", "postFragment");
+}
+
 //private helper functions ahead
 
 //http://learningwebgl.com/blog/?p=28
@@ -107,7 +112,7 @@ function _CreateShader(vs_source_id, fs_source_id)
     mat4.ortho(-1, 1, -1, 1, -1, 1, Projection);
     program.SetProjection(Projection);
 
-    program.SetColor([1.0, 1.0, 0.0, 1.0]);
+    program.SetColor([1.0, 1.0, 1.0, 1.0]);
 
     return program;
 }

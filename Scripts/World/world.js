@@ -41,6 +41,8 @@ function World(game)
     var Projection = mat4.create();
     mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
     asteroidShader.SetProjection(Projection);
+    
+    var postProcessor = new PostProcessor();
 
     //Functions
     this.Clicked = function(canvas, event)
@@ -80,6 +82,10 @@ function World(game)
         this.FPS = dt != 0 ? 1 / dt : "N/A";
         last = now;
 
+        postProcessor.Begin();
+        
+        this.SetProjection();
+        
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         asteroidShader.Enable();
@@ -102,10 +108,21 @@ function World(game)
                 this.Culled--;
             }
         }
+        
+        postProcessor.End();
+        postProcessor.Draw();
 
         this.CheckCollisions();
 
         requestAnimFrame(function() { g_World.Update(); });
+    }
+    
+    this.SetProjection = function()
+    {
+        asteroidShader.Enable();
+        var Projection = mat4.create();
+        mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
+        asteroidShader.SetProjection(Projection);
     }
 
     this.Resized = function()
@@ -114,12 +131,9 @@ function World(game)
         canvas.height = canvas.clientHeight;
         this.HalfSize = [0.5 * canvas.width, 0.5 * canvas.height];
 
-        gl.viewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+        postProcessor.InitialiseFrameBuffer(canvas.clientWidth, canvas.clientHeight);
 
-        asteroidShader.Enable();
-        var Projection = mat4.create();
-        mat4.ortho(-this.HalfSize[0], this.HalfSize[0], -this.HalfSize[1], this.HalfSize[1], -1, 1, Projection);
-        asteroidShader.SetProjection(Projection);
+        this.SetProjection();
     }
 
     //initialise render window

@@ -30,6 +30,7 @@ Licence in LICENCE.txt
 		<script src="Scripts/World/statistics.js" type="text/javascript"></script>
 		<script src="Scripts/World/diagnostics.js" type="text/javascript"></script>
 		<script src="Scripts/Rendering/shaders.js" type="text/javascript"></script>
+        <script src="Scripts/Rendering/postprocessor.js" type="text/javascript"></script>
 		
 		<script src="Scripts/Game/game.js" type="text/javascript"></script>
 		<script src="Scripts/World/world.js" type="text/javascript"></script>
@@ -60,6 +61,86 @@ Licence in LICENCE.txt
 		    void main()
 		    {
 		        gl_FragColor = color;
+		    }
+		</script>
+        
+        <script id="postVertex" type="x-shader/x-vertex">
+            attribute vec2 pos;
+            
+            uniform mat4 projection;
+            
+            varying vec2 vTexCoords;
+			
+            void main()
+            {
+                vTexCoords.s = (pos.x + 1.0) / 2.0;
+                vTexCoords.t = (pos.y + 1.0) / 2.0;
+                
+                gl_Position = projection * vec4(pos, 0.0, 1.0);
+            }
+		</script>
+        
+        <script id="postFragment" type="x-shader/x-fragment">
+            precision highp float;
+            
+            uniform vec4 color;
+            uniform sampler2D sampler;
+            uniform float time;
+
+            varying vec2 vTexCoords;
+            
+            void PixelateTexCoords(inout vec2 texCoords)
+            {
+                texCoords = 1000.0 * texCoords;
+                texCoords = vec2( floor(texCoords.x), floor(texCoords.y) );
+                texCoords /= 1000.0;
+            }
+            
+            //from stackoverflow user dep.
+            //http://stackoverflow.com/a/4275343
+            float rand(vec2 co)
+            {
+                return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+            }
+            
+            void EaseToGray(inout vec4 color)
+            {
+                color = vec4(0.1, 0.1, 0.1, 0.0) + 0.8 * color;
+                color.a = 1.0;
+            }
+		    
+		    void main()
+		    {
+                const float sIntensity = 1.0;
+                const float nIntensity = 1.0;
+                const float sCount = 4000.0;
+                
+                vec2 texcoords = vTexCoords;
+                PixelateTexCoords(texcoords);
+            
+                vec4 sceneColor = texture2D(sampler, texcoords);
+                EaseToGray(sceneColor);
+
+                float x = rand( mod(time, 5.0) / 10000.0 * vTexCoords);// * mod(time, 10.0);
+                float dx = mod( x, 0.01 );
+                
+                //the following is
+                //taken from the film pass in ThreeNode.js example demo
+                //http://idflood.github.com/ThreeNodes.js/
+                // add noise
+                vec3 cResult = sceneColor.rgb + sceneColor.rgb * clamp( 0.1 + dx * 100.0, 0.0, 1.0 );
+                
+                // get us a sine and cosine
+                vec2 sc = vec2( sin( vTexCoords.y * sCount ), cos( vTexCoords.y * sCount ) );
+                
+                // add scanlines
+                cResult += sceneColor.rgb * vec3( sc.x, sc.y, sc.x ) * sIntensity;
+                
+                // interpolate between source and result by intensity
+                cResult = sceneColor.rgb + clamp( nIntensity, 0.0,1.0 ) * ( cResult - sceneColor.rgb );
+                cResult *= vec3( cResult.r * 0.3 + cResult.g * 0.59 + cResult.b * 0.11 );
+                
+		        gl_FragColor = vec4( cResult, sceneColor.a );
 		    }
 		</script>
 	</head>
