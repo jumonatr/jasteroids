@@ -19,7 +19,7 @@ function ToggleBlog(item)
     if (item.checked)
     {
         var blog = document.getElementById("body_container");
-        blog.style.visibility = "visible";
+        blog.style.display = "block";
         
         var buttonText = document.getElementById("buttonText");
         buttonText.innerHTML = "Show Game";
@@ -27,7 +27,7 @@ function ToggleBlog(item)
     else
     {
         var blog = document.getElementById("body_container");
-        blog.style.visibility = "hidden";
+        blog.style.display = "none";
         
         var buttonText = document.getElementById("buttonText");
         buttonText.innerHTML = "Show Blog";
