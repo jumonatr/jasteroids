@@ -18,8 +18,8 @@ Data.MaxDebrisLifeSpan = 10;
 Data.EngineAccel = 500;
 Data.EngineDegradation = 0.99;
 
-Data.RotationAccel = 2 * Math.PI;
-Data.RotationDegradation = 0.98;
+Data.RotationAccel = 3 * Math.PI;
+Data.RotationDegradation = 0.97;
 
 Data.BulletSpeed = 300;
 Data.MaxBullets = 10;
