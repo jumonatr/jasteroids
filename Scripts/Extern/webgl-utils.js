@@ -113,7 +113,6 @@ var setupWebGL = function(canvas, opt_attribs, opt_onError) {
       if (msg) {
         str += "<br/><br/>Status: " + msg;
       }
-      container.innerHTML = makeFailHTML(str);
     }
   };
 
