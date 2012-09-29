@@ -206,7 +206,7 @@ World.prototype.DestroyGameObject = function(element)
         go = element;
 
     if (go instanceof Ship)
-        return; //invulnerable for now
+       Help.CallIn(5000, location, "reload");//he's dead jim, reload the game
 
     if (typeof(element) == "number")
         this.GameObjects.splice(element, 1);

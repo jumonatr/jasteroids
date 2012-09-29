@@ -134,6 +134,15 @@ Ship.prototype.Update = function(dt)
     this.UpdateParticles();
 }
 
+Ship.prototype.Break = function()
+{
+    var lines = this.Shape.SplitIntoLines(this.Position, this.Velocity, this.Angle, this.AngularVelocity);
+    for(var i = 0; i < lines.length; ++i)
+        lines[i].Color = Help.Colors.YELLOW;
+    
+    return lines;
+}
+
 Ship.prototype.Draw = function(program)
 {
     var transform = this.GetTransform();
